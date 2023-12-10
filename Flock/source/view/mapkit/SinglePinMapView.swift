@@ -31,6 +31,8 @@ struct SinglePinMapViewRepresentable: UIViewRepresentable {
     
     @Binding var pin: MKMapItem
     
+    var mapViewDelegate: MapViewDelegate = MapViewDelegate()
+    
     func getRegion() -> MKCoordinateRegion {
         return MKCoordinateRegion(
             center: pin.placemark.coordinate,
@@ -45,8 +47,9 @@ struct SinglePinMapViewRepresentable: UIViewRepresentable {
         for annotation in view.annotations {
             view.removeAnnotation(annotation)
         }
+        view.delegate = mapViewDelegate
         view.setRegion(getRegion(), animated: true)
-        view.addAnnotation(MKPointAnnotation(__coordinate: pin.placemark.coordinate))
+        view.addAnnotation(MKPointAnnotation(__coordinate: pin.placemark.coordinate, title: "pin", subtitle: ""))
     }
     
     func makeUIView(context: Context) -> MKMapView {

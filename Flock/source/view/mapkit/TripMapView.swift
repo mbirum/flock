@@ -3,8 +3,7 @@ import SwiftUI
 import MapKit
 
 struct TripMapView: View {
-    @Binding var sourceLocationString: String
-    @Binding var destinationLocationString: String
+    @Binding var trip: Trip
     @State var routeSourcePin: MKMapItem? = DefaultMapKitLocation.pin
     @State var routeDestinationPin: MKMapItem? = DefaultMapKitLocation.pin
     @State var route: MKRoute? = nil
@@ -16,20 +15,16 @@ struct TripMapView: View {
             routeDestinationPin: $routeDestinationPin
         )
         .onAppear(perform: {
-            calculateRoute(sourceLocationString, destinationLocationString)
+            calculateRoute(trip)
         })
-        .onChange(of: sourceLocationString) { oldValue, newValue in
-            calculateRoute(newValue, destinationLocationString)
-        }
-        .onChange(of: destinationLocationString) { oldValue, newValue in
-            calculateRoute(sourceLocationString, newValue)
+        .onChange(of: trip) { oldValue, newValue in
+            calculateRoute(newValue)
         }
     }
     
-    func calculateRoute(_ sourceLocationString: String, _ destinationLocationString: String) -> Void {
+    func calculateRoute(_ trip: Trip) -> Void {
         LocationSearchService.calculateRoute(
-            sourceLocation: sourceLocationString,
-            destinationLocation: destinationLocationString,
+            trip: trip,
             routeHandler: { source, destination, route in
                 self.routeSourcePin = source
                 self.routeDestinationPin = destination
@@ -45,7 +40,7 @@ struct RouteMapViewRepresentable: UIViewRepresentable {
     @Binding var routeSourcePin: MKMapItem?
     @Binding var routeDestinationPin: MKMapItem?
     
-    var mapViewDelegate: RouteMapViewDelegate = RouteMapViewDelegate()
+    var mapViewDelegate: MapViewDelegate = MapViewDelegate()
     
     func getRegion() -> MKCoordinateRegion {
         guard let unwrappedRouteSourcePin = routeSourcePin else {
@@ -78,8 +73,8 @@ struct RouteMapViewRepresentable: UIViewRepresentable {
         }
         
         view.addOverlay(unwrappedRoute.polyline)
-        view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedRouteSourcePin.placemark.coordinate))
-        view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedRouteDestinationPin.placemark.coordinate))
+        view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedRouteSourcePin.placemark.coordinate, title: "source", subtitle: ""))
+        view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedRouteDestinationPin.placemark.coordinate, title: "destination", subtitle: ""))
         view.setVisibleMapRect(unwrappedRoute.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
     }
     
@@ -91,11 +86,6 @@ struct RouteMapViewRepresentable: UIViewRepresentable {
     
 }
 
-class RouteMapViewDelegate: NSObject, MKMapViewDelegate {
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        let renderer = MKPolylineRenderer(overlay: overlay)
-        renderer.strokeColor = UIColor.systemIndigo
-        renderer.lineWidth = 5.0
-        return renderer
-    }
+#Preview {
+    HomeView()
 }

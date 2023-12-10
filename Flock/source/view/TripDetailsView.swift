@@ -117,7 +117,7 @@ struct TripDetailsView: View, KeyboardReadable {
     
     var MapModule: some View {
         ZStack {
-            TripMapView(sourceLocationString: $trip.start, destinationLocationString: $trip.destination)
+            TripMapView(trip: $trip)
             HStack {
                 Image(systemName: "plus.magnifyingglass")
                     .padding(.all, 10)
@@ -143,7 +143,7 @@ struct TripDetailsView: View, KeyboardReadable {
             .padding(18)
             .padding(.top, 5)
             .padding(.trailing, 5)
-            TripMapView(sourceLocationString: $trip.start, destinationLocationString: $trip.destination)
+            TripMapView(trip: $trip)
         }
     }
     
@@ -156,4 +156,8 @@ struct TripDetailsView: View, KeyboardReadable {
             isPresent: $isLocationSearchSheetPresent
         )
     }
+}
+
+#Preview {
+    HomeView()
 }
