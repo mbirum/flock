@@ -2,7 +2,7 @@
 import SwiftUI
 import MapKit
 
-struct RouteMapView: View {
+struct TripMapView: View {
     @Binding var sourceLocationString: String
     @Binding var destinationLocationString: String
     @State var routeSourcePin: MKMapItem? = DefaultMapKitLocation.pin
