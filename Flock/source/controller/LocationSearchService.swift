@@ -34,6 +34,24 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
         }
     }
     
+    static func calculateRoute(source: MKMapItem, destination: MKMapItem, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
+        let request = MKDirections.Request()
+        request.source = source
+        request.destination = destination
+        request.requestsAlternateRoutes = true
+        request.transportType = .automobile
+
+        let directions = MKDirections(request: request)
+
+        directions.calculate {
+            response, error in
+            guard let unwrappedResponse = response else { return }
+            if let route = unwrappedResponse.routes.first {
+                routeHandler(source, destination, route)
+            }
+        }
+    }
+    
     static func calculateRoute(sourceLocation: String, destinationLocation: String, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
         
         // translate source

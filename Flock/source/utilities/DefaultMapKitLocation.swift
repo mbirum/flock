@@ -13,4 +13,5 @@ struct DefaultMapKitLocation {
                 longitudeDelta: 0.17
             )
         )
+    public static var rect: MKMapRect = MKMapRect(origin: MKMapPoint(pin.placemark.coordinate), size: MKMapSize(width: 100, height: 100))
 }

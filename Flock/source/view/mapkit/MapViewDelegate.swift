@@ -5,7 +5,7 @@ import MapKit
 class MapViewDelegate: NSObject, MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKPolylineRenderer(overlay: overlay)
-        renderer.strokeColor = UIColor.systemIndigo
+        renderer.strokeColor = UIColor(named: "ButtonColor")
         renderer.lineWidth = 5.0
         return renderer
     }
@@ -32,7 +32,8 @@ class MapViewDelegate: NSObject, MKMapViewDelegate {
         case "destination":
             annotationView?.image = UIImage(systemName: "flag.checkered")
         default:
-            annotationView?.image = UIImage(systemName: "mappin.circle.fill")
+            annotationView?.image = UIImage(named: "AppIcon")
+            annotationView?.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
             break
         }
         
