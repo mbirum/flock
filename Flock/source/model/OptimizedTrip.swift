@@ -20,6 +20,8 @@ class OptimizedTrip {
         var driver: Rider? = nil
         var passengerNodes: [FlockNode] = []
         for rider in trip.riders {
+            
+            // assume only 1 driver for now
             if rider.isDriver {
                 driver = rider
             }

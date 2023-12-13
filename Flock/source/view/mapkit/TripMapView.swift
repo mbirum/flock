@@ -30,6 +30,8 @@ struct TripMapView: View {
         }
     }
     
+    // Since route calculation requests are async, start an interval timer that
+    // checks to see if requests are finished. Invalidate inner view when complete
     func startOptimizedTripChecker() -> Void {
         loadOverlayPresent = true
         TimerBasedConditionCheck.create(condition: {
@@ -40,6 +42,8 @@ struct TripMapView: View {
         })
     }
     
+    // The trip is ready if the # of 'optimized' routes = expected # of routes
+    // AND each optimized route has a route, from.pin, and to.pin set
     func isOptimizedTripReady(_ optimizedTrip: OptimizedTrip) -> Bool {
         if optimizedTrip.routeStack.count < (optimizedTrip.trip.passengers + 1) {
             return false
@@ -54,6 +58,10 @@ struct TripMapView: View {
     
 }
 
+
+
+
+// inner MapKit 'representable' view
 struct TripMapViewRepresentable: UIViewRepresentable {
     
     @Binding var invalidateView: Bool
@@ -84,9 +92,18 @@ struct TripMapViewRepresentable: UIViewRepresentable {
             guard let unwrappedFlockRoute = flockRoute.route, let unwrappedFlockFromPin = flockRoute.from.pin, let unwrappedFlockToPin = flockRoute.to.pin else {
                 continue
             }
+            
+            // TODO - remove
+            print("routeDistance:\(unwrappedFlockRoute.distance)")
+            for step in unwrappedFlockRoute.steps {
+                print("step:\(step.instructions)")
+            }
+            
             view.addOverlay(unwrappedFlockRoute.polyline)
             view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
             view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
+            
+            // for each route, find the one with the largest boundingRect and use as whole view rect
             let boundingRect = unwrappedFlockRoute.polyline.boundingMapRect
             if boundingRect.origin.x < minX {
                 minX = boundingRect.origin.x
@@ -112,6 +129,8 @@ struct TripMapViewRepresentable: UIViewRepresentable {
     }
     
 }
+
+
 
 
 #Preview {
