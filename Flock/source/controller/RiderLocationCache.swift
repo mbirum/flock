@@ -33,12 +33,10 @@ class RiderLocationCache: ObservableObject {
     
     static func initializeCache(from: Trip) -> Void {
         if RiderLocationCache.hasLocationChanged(id: from.destinationCacheID, locationString: from.destination) {
-            print("initializing cache location for \(from.destinationCacheID)")
             RiderLocationCache.putFromLocationString(id: from.destinationCacheID, locationString: from.destination)
         }
         for rider in from.riders {
             if RiderLocationCache.hasLocationChanged(id: rider.id, locationString: rider.location) {
-                print("initializing cache location for \(rider.id)")
                 RiderLocationCache.putFromLocationString(id: rider.id, locationString: rider.location)
             }
         }

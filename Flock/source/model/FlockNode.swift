@@ -24,7 +24,6 @@ class FlockNode: NSObject {
         // if location hasnt changed in cache, return cached item
         if !RiderLocationCache.hasLocationChanged(id: self.riderId, locationString: self.locationString) {
             guard let unwrappedRiderId = riderId else { return }
-            print("using cached location for \(unwrappedRiderId)")
             guard let unwrappedCacheItem = RiderLocationCache.get(unwrappedRiderId) else { return }
             self.pin = nil
             self.pin = unwrappedCacheItem.pin
@@ -35,7 +34,6 @@ class FlockNode: NSObject {
                 mapItemHandler: { item in
                     self.pin = item
                     guard let unwrappedRiderId = self.riderId else { return }
-                    print("putting cache location for \(unwrappedRiderId)")
                     RiderLocationCache.put(id: unwrappedRiderId, locationString: self.locationString, pin: item)
                 }
             )
