@@ -15,9 +15,11 @@ class FlockRoute: NSObject {
         self.to = to
         super.init()
         fromObservation = observe(\.from.pin, options: [.old, .new]) { object, change in
+            guard let _ = from.pin else { return }
             self.calculateRoute()
         }
         toObservation = observe(\.to.pin, options: [.old, .new]) { object, change in
+            guard let _ = to.pin else { return }
             self.calculateRoute()
         }
         calculateRoute()

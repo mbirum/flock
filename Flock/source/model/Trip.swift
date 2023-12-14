@@ -3,6 +3,7 @@ import Foundation
 
 struct Trip: Encodable, Decodable, Hashable, Identifiable {
     var id = UUID()
+    var destinationCacheID: UUID = UUID()
     var name: String
     var destination: String
     var useSuggestedDrivers: Bool

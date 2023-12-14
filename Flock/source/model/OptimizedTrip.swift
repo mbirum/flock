@@ -32,7 +32,7 @@ class OptimizedTrip {
         guard let unwrappedDriver = driver else { return }
         var newRouteStack: [FlockRoute] = []
         let startNode: FlockNode = FlockNode(riderId: unwrappedDriver.id, locationString: unwrappedDriver.location, annotationType: "source")
-        let destinationNode: FlockNode = FlockNode(riderId: nil, locationString: trip.destination, annotationType: "destination")
+        let destinationNode: FlockNode = FlockNode(riderId: trip.destinationCacheID, locationString: trip.destination, annotationType: "destination")
         for i in 0..<passengerNodes.count {
             if i == 0 {
                 let newRoute: FlockRoute = FlockRoute(from: startNode, to: passengerNodes[i])
