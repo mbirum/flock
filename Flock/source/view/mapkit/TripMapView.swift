@@ -94,10 +94,10 @@ struct TripMapViewRepresentable: UIViewRepresentable {
             }
             
             // TODO - remove
-            print("routeDistance:\(unwrappedFlockRoute.distance)")
-            for step in unwrappedFlockRoute.steps {
-                print("step:\(step.instructions)")
-            }
+//            print("routeDistance:\(unwrappedFlockRoute.distance)")
+//            for step in unwrappedFlockRoute.steps {
+//                print("step:\(step.instructions)")
+//            }
             
             view.addOverlay(unwrappedFlockRoute.polyline)
             view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))

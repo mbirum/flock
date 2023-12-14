@@ -26,13 +26,13 @@ class OptimizedTrip {
                 driver = rider
             }
             else {
-                passengerNodes.append(FlockNode(rider.location, annotationType: "pickup"))
+                passengerNodes.append(FlockNode(riderId: rider.id, locationString: rider.location, annotationType: "pickup"))
             }
         }
         guard let unwrappedDriver = driver else { return }
         var newRouteStack: [FlockRoute] = []
-        let startNode: FlockNode = FlockNode(unwrappedDriver.location, annotationType: "source")
-        let destinationNode: FlockNode = FlockNode(trip.destination, annotationType: "destination")
+        let startNode: FlockNode = FlockNode(riderId: unwrappedDriver.id, locationString: unwrappedDriver.location, annotationType: "source")
+        let destinationNode: FlockNode = FlockNode(riderId: nil, locationString: trip.destination, annotationType: "destination")
         for i in 0..<passengerNodes.count {
             if i == 0 {
                 let newRoute: FlockRoute = FlockRoute(from: startNode, to: passengerNodes[i])
