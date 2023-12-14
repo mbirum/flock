@@ -4,17 +4,41 @@ import MapKit
 
 class FlockNode: NSObject {
     var riderId: UUID?
+    var riderName: String
     var locationString: String {
         didSet {
             requestPin()
         }
     }
     var annotationType: String
+    var isDriver: Bool = false
+    var isDestination: Bool = false
     @objc dynamic var pin: MKMapItem?
     
-    init(riderId: UUID?, locationString: String, annotationType: String) {
+    init(riderId: UUID?, riderName: String, locationString: String, annotationType: String) {
         self.riderId = riderId
+        self.riderName = riderName
         self.locationString = locationString
+        self.annotationType = annotationType
+        super.init()
+        requestPin()
+    }
+    
+    init(riderId: UUID?, riderName: String, locationString: String, isDriver: Bool, annotationType: String) {
+        self.riderId = riderId
+        self.riderName = riderName
+        self.locationString = locationString
+        self.isDriver = isDriver
+        self.annotationType = annotationType
+        super.init()
+        requestPin()
+    }
+    
+    init(riderId: UUID?, riderName: String, locationString: String, isDestination: Bool, annotationType: String) {
+        self.riderId = riderId
+        self.riderName = riderName
+        self.locationString = locationString
+        self.isDestination = isDestination
         self.annotationType = annotationType
         super.init()
         requestPin()

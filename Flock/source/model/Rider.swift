@@ -14,4 +14,8 @@ struct Rider: Encodable, Decodable, Hashable, Identifiable {
 //    }
     var isDriver: Bool = false
     var passengerCapacity: Int = 3
+    
+    mutating func setIsDriver(isDriver: Bool) -> Void {
+        self.isDriver = isDriver
+    }
 }
