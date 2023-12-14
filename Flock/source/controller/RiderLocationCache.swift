@@ -16,11 +16,40 @@ class RiderLocationCache: ObservableObject {
         shared.lookup[id] = LocationCacheItem(locationString: locationString, pin: pin)
     }
     
+    static func putFromLocationString(id: UUID, locationString: String) -> Void {
+        LocationSearchService.translateLocationToMapItem(
+            location: locationString,
+            mapItemHandler: { item in
+                RiderLocationCache.put(id: id, locationString: locationString, pin: item)
+            }
+        )
+    }
+    
     static func hasLocationChanged(id: UUID?, locationString: String) -> Bool {
         guard let unwrappedId = id else { return true }
         guard let cachedLocation = shared.lookup[unwrappedId] else { return true }
         return cachedLocation.locationString != locationString
     }
+    
+    static func initializeCache(from: Trip) -> Void {
+        if RiderLocationCache.hasLocationChanged(id: from.destinationCacheID, locationString: from.destination) {
+            print("initializing cache location for \(from.destinationCacheID)")
+            RiderLocationCache.putFromLocationString(id: from.destinationCacheID, locationString: from.destination)
+        }
+        for rider in from.riders {
+            if RiderLocationCache.hasLocationChanged(id: rider.id, locationString: rider.location) {
+                print("initializing cache location for \(rider.id)")
+                RiderLocationCache.putFromLocationString(id: rider.id, locationString: rider.location)
+            }
+        }
+    }
+    
+    static func initializeCache(from: [Trip]) -> Void {
+        for trip in from {
+            RiderLocationCache.initializeCache(from: trip)
+        }
+    }
+    
 }
 
 struct LocationCacheItem {

@@ -115,7 +115,7 @@ struct RiderDetailsView: View, KeyboardReadable {
     
     var MapModule: some View {
         ZStack {
-            SinglePinMapView(pinLocationString: $rider.location)
+            SinglePinMapView(riderId: rider.id, pinLocationString: $rider.location)
             HStack {
                 Image(systemName: "plus.magnifyingglass")
                     .padding(.all, 10)
@@ -141,7 +141,7 @@ struct RiderDetailsView: View, KeyboardReadable {
             .padding(18)
             .padding(.top, 5)
             .padding(.trailing, 5)
-            SinglePinMapView(pinLocationString: $rider.location)
+            SinglePinMapView(riderId: rider.id, pinLocationString: $rider.location)
         }
     }
     

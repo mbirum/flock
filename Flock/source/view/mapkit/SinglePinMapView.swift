@@ -4,6 +4,7 @@ import MapKit
 
 struct SinglePinMapView: View {
     
+    @State var riderId: UUID?
     @Binding var pinLocationString: String
     @State var pin: MKMapItem = DefaultMapKitLocation.pin
     
@@ -18,12 +19,24 @@ struct SinglePinMapView: View {
     }
     
     func translateLocation(_ location: String) -> Void {
-        LocationSearchService.translateLocationToMapItem(
-            location: location,
-            mapItemHandler: { item in
-                self.pin = item
-            }
-        )
+        if !RiderLocationCache.hasLocationChanged(id: self.riderId, locationString: self.pinLocationString) {
+            guard let unwrappedRiderId = riderId else { return }
+            print("using cached location for \(unwrappedRiderId)")
+            guard let unwrappedCacheItem = RiderLocationCache.get(unwrappedRiderId) else { return }
+//            self.pin = nil
+            self.pin = unwrappedCacheItem.pin
+        }
+        else {
+            LocationSearchService.translateLocationToMapItem(
+                location: self.pinLocationString,
+                mapItemHandler: { item in
+                    self.pin = item
+                    guard let unwrappedRiderId = self.riderId else { return }
+                    print("putting cache location for \(unwrappedRiderId)")
+                    RiderLocationCache.put(id: unwrappedRiderId, locationString: self.pinLocationString, pin: item)
+                }
+            )
+        }
     }
 }
 

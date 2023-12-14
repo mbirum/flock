@@ -13,6 +13,9 @@ struct HomeView: View {
                 VStack {
                     CustomNavTitle(title: $title, divide: true, isEditable: false, onTap: {})
                     TripList
+                        .onAppear(perform: {
+                            RiderLocationCache.initializeCache(from: tripData.trips)
+                        })
                     AddTripButton
                 }
             }

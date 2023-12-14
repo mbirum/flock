@@ -21,6 +21,7 @@ class FlockNode: NSObject {
     }
     
     func requestPin() -> Void {
+        // if location hasnt changed in cache, return cached item
         if !RiderLocationCache.hasLocationChanged(id: self.riderId, locationString: self.locationString) {
             guard let unwrappedRiderId = riderId else { return }
             print("using cached location for \(unwrappedRiderId)")
