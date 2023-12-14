@@ -50,7 +50,6 @@ struct TripMapView: View {
         for rider in $trip.riders {
             if rider.id == unwrappedSuggestedDriverId {
                 rider.wrappedValue.isDriver = true
-                break
             }
             else {
                 rider.wrappedValue.isDriver = false

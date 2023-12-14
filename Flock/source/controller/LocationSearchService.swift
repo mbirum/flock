@@ -22,6 +22,7 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
     }
     
     static func translateLocationToMapItem(location: String, mapItemHandler: @escaping (_ item: MKMapItem) -> Void) {
+//        print("making location API request")
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = location
         let search = MKLocalSearch(request: request)
@@ -35,6 +36,7 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
     }
     
     static func calculateRoute(source: MKMapItem, destination: MKMapItem, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
+//        print("making route API request")
         let request = MKDirections.Request()
         request.source = source
         request.destination = destination
@@ -50,50 +52,6 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
                 routeHandler(source, destination, route)
             }
         }
-    }
-    
-    static func calculateRoute(sourceLocation: String, destinationLocation: String, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
-        
-        // translate source
-        LocationSearchService.translateLocationToMapItem(
-            location: sourceLocation,
-            mapItemHandler: { source in
-                
-                // translate destination
-                LocationSearchService.translateLocationToMapItem(
-                    location: destinationLocation,
-                    mapItemHandler: { destination in
-                        let request = MKDirections.Request()
-                        request.source = source
-                        request.destination = destination
-                        request.requestsAlternateRoutes = true
-                        request.transportType = .automobile
-
-                        let directions = MKDirections(request: request)
-
-                        directions.calculate {
-                            response, error in
-                            guard let unwrappedResponse = response else { return }
-                            if let route = unwrappedResponse.routes.first {
-                                routeHandler(source, destination, route)
-                            }
-                        }
-                    }
-                )
-            }
-        )
-    }
-    
-    static func calculateRoute(trip: Trip, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
-        var sourceLocation: String? = nil
-        for rider in trip.riders {
-            if rider.isDriver {
-                sourceLocation = rider.location
-                break
-            }
-        }
-        guard let sourceLocation else { return }
-        calculateRoute(sourceLocation: sourceLocation, destinationLocation: trip.destination, routeHandler: routeHandler)
     }
     
 }

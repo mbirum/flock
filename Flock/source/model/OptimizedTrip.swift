@@ -21,6 +21,12 @@ class OptimizedTrip {
     }
     
     func requestRoutes() -> Void {
+        if !OptimizedTripCache.hasTripChanged(trip) {
+            guard let unwrappedCacheItem = OptimizedTripCache.get(trip.id) else { return }
+            self.routeStack = unwrappedCacheItem.routeStack
+            return
+        }
+        
         var flockNodes: [FlockNode] = []
         for rider in trip.riders {
             flockNodes.append(FlockNode(
@@ -75,12 +81,19 @@ class OptimizedTrip {
     }
     
     func optimizeRoutes() -> Void {
+        if !OptimizedTripCache.hasTripChanged(trip) {
+            guard let unwrappedCacheItem = OptimizedTripCache.get(trip.id) else { return }
+            self.routeStack = unwrappedCacheItem.routeStack
+            return
+        }
         if trip.useSuggestedDrivers {
             optimizeRoutesForSuggestedDrivers()
         }
         else {
             optimizeRoutesForSpecifiedDrivers()
         }
+        OptimizedTripCache.put(trip: trip, routeStack: self.routeStack)
+    
     }
     
     func optimizeRoutesForSuggestedDrivers() -> Void {
