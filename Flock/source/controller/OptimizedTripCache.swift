@@ -1,9 +1,3 @@
-//
-//  OptimizedTripCache.swift
-//  Flock
-//
-//  Created by Matt Birum on 12/14/23.
-//
 
 import Foundation
 
