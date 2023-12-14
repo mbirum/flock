@@ -37,9 +37,24 @@ struct TripMapView: View {
         TimerBasedConditionCheck.create(condition: {
             return self.isOptimizedTripReady(self.optimizedTrip!)
         }, complete: {
+            if trip.useSuggestedDrivers {
+                setNewSuggestedDriver()
+            }
             invalidateView.toggle()
             loadOverlayPresent = false
         })
+    }
+    
+    func setNewSuggestedDriver() -> Void {
+        guard let unwrappedSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
+        for rider in $trip.riders {
+            if rider.id == unwrappedSuggestedDriverId {
+                rider.wrappedValue.isDriver = true
+            }
+            else {
+                rider.wrappedValue.isDriver = false
+            }
+        }
     }
     
     // The trip is ready if the # of 'optimized' routes = expected # of routes
