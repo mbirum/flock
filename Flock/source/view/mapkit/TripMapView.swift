@@ -11,7 +11,6 @@ struct TripMapView: View {
     
     var body: some View {
         ZStack {
-            
             TripMapViewRepresentable(
                 invalidateView: $invalidateView,
                 optimizedTrip: $optimizedTrip
@@ -46,9 +45,9 @@ struct TripMapView: View {
     }
     
     func setNewSuggestedDriver() -> Void {
-        guard let unwrappedSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
+        guard let uSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
         for rider in $trip.riders {
-            if rider.id == unwrappedSuggestedDriverId {
+            if rider.id == uSuggestedDriverId {
                 rider.wrappedValue.isDriver = true
             }
             else {
@@ -74,8 +73,6 @@ struct TripMapView: View {
 }
 
 
-
-
 // inner MapKit 'representable' view
 struct TripMapViewRepresentable: UIViewRepresentable {
     
@@ -97,41 +94,37 @@ struct TripMapViewRepresentable: UIViewRepresentable {
         }
         view.delegate = mapViewDelegate
         view.setRegion(getRegion(), animated: true)
-        view.setVisibleMapRect(DefaultMapKitLocation.rect, edgePadding: UIEdgeInsets.init(top: 100.0, left: 50.0, bottom: 100.0, right: 50.0), animated: true)
+        view.setVisibleMapRect(
+            DefaultMapKitLocation.rect,
+            edgePadding: UIEdgeInsets.init(top: 100.0, left: 50.0, bottom: 100.0, right: 50.0),
+            animated: true
+        )
         
-        guard let unwrappedOptimizedTrip = optimizedTrip else { return }
+        guard let uOptimizedTrip = optimizedTrip else { return }
         
-        var minX: Double = Double.greatestFiniteMagnitude, minY: Double = Double.greatestFiniteMagnitude
-        var width: Double = 0, height: Double = 0
-        for flockRoute in unwrappedOptimizedTrip.routeStack {
-            guard let unwrappedFlockRoute = flockRoute.route, let unwrappedFlockFromPin = flockRoute.from.pin, let unwrappedFlockToPin = flockRoute.to.pin else {
+        var minX: Double = Double.greatestFiniteMagnitude
+        var minY: Double = Double.greatestFiniteMagnitude
+        var width: Double = 0
+        var height: Double = 0
+        for flockRoute in uOptimizedTrip.routeStack {
+            guard let uFlockRoute = flockRoute.route, 
+                    let uFlockFromPin = flockRoute.from.pin,
+                    let uFlockToPin = flockRoute.to.pin
+            else {
                 continue
             }
-            
-            // TODO - remove
-//            print("routeDistance:\(unwrappedFlockRoute.distance)")
-//            for step in unwrappedFlockRoute.steps {
-//                print("step:\(step.instructions)")
-//            }
-            
-            view.addOverlay(unwrappedFlockRoute.polyline)
-            view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
-            view.addAnnotation(MKPointAnnotation(__coordinate: unwrappedFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
+
+            view.addOverlay(uFlockRoute.polyline)
+            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
+            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
             
             // for each route, find the one with the largest boundingRect and use as whole view rect
-            let boundingRect = unwrappedFlockRoute.polyline.boundingMapRect
-            if boundingRect.origin.x < minX {
-                minX = boundingRect.origin.x
-            }
-            if boundingRect.origin.y < minY {
-                minY = boundingRect.origin.y
-            }
-            if boundingRect.width > width {
-                width = boundingRect.width
-            }
-            if boundingRect.height > height {
-                height = boundingRect.height
-            }
+            let rect = uFlockRoute.polyline.boundingMapRect
+            if rect.origin.x < minX { minX = rect.origin.x }
+            if rect.origin.y < minY { minY = rect.origin.y }
+            if rect.width > width { width = rect.width }
+            if rect.height > height { height = rect.height }
+            
         }
         let rect: MKMapRect = MKMapRect(origin: MKMapPoint(x: minX, y: minY),size: MKMapSize(width: width, height: height))
         view.setVisibleMapRect(rect, edgePadding: UIEdgeInsets.init(top: 90.0, left: 75.0, bottom: 75.0, right: 75.0), animated: true)

@@ -19,8 +19,8 @@ struct Trip: Encodable, Decodable, Hashable, Identifiable {
                     break
                 }
             }
-            guard let unwrappedStartLocationString = startLocationString else { return DefaultMapKitLocation.locationString }
-            return unwrappedStartLocationString
+            guard let uStartLocationString = startLocationString else { return DefaultMapKitLocation.locationString }
+            return uStartLocationString
         }
         set(newStartString) {
             for var rider in riders {

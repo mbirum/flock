@@ -26,8 +26,8 @@ class RiderLocationCache: ObservableObject {
     }
     
     static func hasLocationChanged(id: UUID?, locationString: String) -> Bool {
-        guard let unwrappedId = id else { return true }
-        guard let cachedLocation = shared.lookup[unwrappedId] else { return true }
+        guard let uId = id else { return true }
+        guard let cachedLocation = shared.lookup[uId] else { return true }
         return cachedLocation.locationString != locationString
     }
     

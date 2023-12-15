@@ -22,8 +22,8 @@ class OptimizedTrip {
     
     func requestRoutes() -> Void {
         if !OptimizedTripCache.hasTripChanged(trip) {
-            guard let unwrappedCacheItem = OptimizedTripCache.get(trip.id) else { return }
-            self.routeStack = unwrappedCacheItem.routeStack
+            guard let uCacheItem = OptimizedTripCache.get(trip.id) else { return }
+            self.routeStack = uCacheItem.routeStack
             return
         }
         
@@ -82,8 +82,8 @@ class OptimizedTrip {
     
     func optimizeRoutes() -> Void {
         if !OptimizedTripCache.hasTripChanged(trip) {
-            guard let unwrappedCacheItem = OptimizedTripCache.get(trip.id) else { return }
-            self.routeStack = unwrappedCacheItem.routeStack
+            guard let uCacheItem = OptimizedTripCache.get(trip.id) else { return }
+            self.routeStack = uCacheItem.routeStack
             return
         }
         if trip.useSuggestedDrivers {

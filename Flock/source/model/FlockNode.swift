@@ -47,18 +47,18 @@ class FlockNode: NSObject {
     func requestPin() -> Void {
         // if location hasnt changed in cache, return cached item
         if !RiderLocationCache.hasLocationChanged(id: self.riderId, locationString: self.locationString) {
-            guard let unwrappedRiderId = riderId else { return }
-            guard let unwrappedCacheItem = RiderLocationCache.get(unwrappedRiderId) else { return }
+            guard let uRiderId = riderId else { return }
+            guard let uCacheItem = RiderLocationCache.get(uRiderId) else { return }
             self.pin = nil
-            self.pin = unwrappedCacheItem.pin
+            self.pin = uCacheItem.pin
         }
         else {
             LocationSearchService.translateLocationToMapItem(
                 location: self.locationString,
                 mapItemHandler: { item in
                     self.pin = item
-                    guard let unwrappedRiderId = self.riderId else { return }
-                    RiderLocationCache.put(id: unwrappedRiderId, locationString: self.locationString, pin: item)
+                    guard let uRiderId = self.riderId else { return }
+                    RiderLocationCache.put(id: uRiderId, locationString: self.locationString, pin: item)
                 }
             )
         }

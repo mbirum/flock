@@ -26,10 +26,10 @@ class FlockRoute: NSObject {
     }
     
     func calculateRoute() -> Void {
-        guard let unwrappedFromPin = from.pin, let unwrappedToPin = to.pin else { return }
+        guard let uFromPin = from.pin, let uToPin = to.pin else { return }
         LocationSearchService.calculateRoute(
-            source: unwrappedFromPin,
-            destination: unwrappedToPin,
+            source: uFromPin,
+            destination: uToPin,
             routeHandler: { source, destination, route in
                 self.route = route
             }
