@@ -10,36 +10,43 @@ class FlockNode: NSObject {
             requestPin()
         }
     }
-    var annotationType: String
+    var annotationType: String {
+        if isDriver {
+            return "source"
+        }
+        else if isDestination {
+            return "destination"
+        }
+        else {
+            return "pickup"
+        }
+    }
     var isDriver: Bool = false
     var isDestination: Bool = false
     @objc dynamic var pin: MKMapItem?
     
-    init(riderId: UUID?, riderName: String, locationString: String, annotationType: String) {
+    init(riderId: UUID?, riderName: String, locationString: String) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
-        self.annotationType = annotationType
         super.init()
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, isDriver: Bool, annotationType: String) {
+    init(riderId: UUID?, riderName: String, locationString: String, isDriver: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
         self.isDriver = isDriver
-        self.annotationType = annotationType
         super.init()
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, isDestination: Bool, annotationType: String) {
+    init(riderId: UUID?, riderName: String, locationString: String, isDestination: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
         self.isDestination = isDestination
-        self.annotationType = annotationType
         super.init()
         requestPin()
     }

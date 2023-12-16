@@ -24,6 +24,16 @@ struct TripDetailsView: View, KeyboardReadable {
                 MapModule
             
             }
+            .onAppear(perform: {
+                if trip.useSuggestedDrivers {
+                    if trip.drivers == 0 {
+                        for rider in $trip.riders {
+                            rider.wrappedValue.isDriver = true
+                            break
+                        }
+                    }
+                }
+            })
             .sheet(isPresented: $isTitlePopoverPresent) {
                 GenericTextFieldSheet(label: "Name", field: $trip.name, isPresent: $isTitlePopoverPresent)
             }

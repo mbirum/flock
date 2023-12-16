@@ -10,6 +10,11 @@ class FlockRoute: NSObject {
     
     @objc dynamic var route: MKRoute? = nil
     
+    var distance: Double {
+        guard let uRoute = route else { return 0 }
+        return uRoute.distance
+    }
+    
     init(from: FlockNode, to: FlockNode) {
         self.from = from
         self.to = to
@@ -27,6 +32,7 @@ class FlockRoute: NSObject {
     
     func calculateRoute() -> Void {
         guard let uFromPin = from.pin, let uToPin = to.pin else { return }
+        print("calculating route for \(from.riderName) to \(to.riderName)")
         LocationSearchService.calculateRoute(
             source: uFromPin,
             destination: uToPin,
