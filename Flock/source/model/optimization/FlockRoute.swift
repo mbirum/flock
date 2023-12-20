@@ -32,7 +32,7 @@ class FlockRoute: NSObject {
     
     func calculateRoute() -> Void {
         guard let uFromPin = from.pin, let uToPin = to.pin else { return }
-        print("calculating route for \(from.riderName) to \(to.riderName)")
+//        print("calculating route for \(from.riderName) to \(to.riderName)")
         LocationSearchService.calculateRoute(
             source: uFromPin,
             destination: uToPin,

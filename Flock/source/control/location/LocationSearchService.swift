@@ -34,6 +34,12 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
     }
     
     static func calculateRoute(source: MKMapItem, destination: MKMapItem, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
+        if RouteCache.isRouteCached(source: source.placemark.title!, destination: destination.placemark.title!) {
+            let key: RouteCacheKey = RouteCacheKey(source: source.placemark.title!, destination: destination.placemark.title!)
+            guard let routeCacheItem: RouteCacheItem = RouteCache.get(key) else { return }
+            routeHandler(source, destination, routeCacheItem.route)
+            return
+        }
         let request = MKDirections.Request()
         request.source = source
         request.destination = destination
@@ -41,11 +47,13 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
         request.transportType = .automobile
 
         let directions = MKDirections(request: request)
-
         directions.calculate {
             response, error in
             guard let uResponse = response else { return }
             if let route = uResponse.routes.first {
+                RouteCache.put(
+                    key: RouteCacheKey(source: source.placemark.title!, destination: destination.placemark.title!),
+                    route: route)
                 routeHandler(source, destination, route)
             }
         }
