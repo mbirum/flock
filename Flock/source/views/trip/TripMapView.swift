@@ -39,21 +39,40 @@ struct TripMapView: View {
             if trip.useSuggestedDrivers {
                 setNewSuggestedDriver()
             }
+            OptimizedTripCache.put(trip: trip, routeStack: self.optimizedTrip!.routeStack)
             invalidateView.toggle()
             loadOverlayPresent = false
         })
     }
     
     func setNewSuggestedDriver() -> Void {
-        guard let uSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
+        guard let uSuggestedDriverIds = optimizedTrip?.suggestedDriverIds else { return }
+        if uSuggestedDriverIds.count == 0 {
+            return
+        }
         for rider in $trip.riders {
-            if rider.id == uSuggestedDriverId {
+            if uSuggestedDriverIds.contains(rider.id) {
                 rider.wrappedValue.isDriver = true
             }
             else {
                 rider.wrappedValue.isDriver = false
             }
         }
+        guard let uRouteStack = optimizedTrip?.routeStack else { return }
+        for route in uRouteStack {
+            if uSuggestedDriverIds.contains(route.from.riderId!) {
+                route.from.isDriver = true
+            }
+        }
+//        guard let uSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
+//        for rider in $trip.riders {
+//            if rider.id == uSuggestedDriverId {
+//                rider.wrappedValue.isDriver = true
+//            }
+//            else {
+//                rider.wrappedValue.isDriver = false
+//            }
+//        }
     }
     
     // The trip is ready if the # of 'optimized' routes = expected # of routes
