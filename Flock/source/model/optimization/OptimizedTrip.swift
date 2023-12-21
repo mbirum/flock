@@ -94,6 +94,7 @@ class OptimizedTrip {
     }
     
     func optimizeRoutesForSuggestedDrivers() -> Void {
+        // create map with the node as the key and collections of routes from and to the node as the value
         var nodeRouteMap: [FlockNode:NodeSpecificRouteCollections] = [:]
         for node in allNodes {
             let routesFrom: [FlockRoute] = routeProspects.filter({$0.from.riderId == node.riderId})
@@ -104,6 +105,8 @@ class OptimizedTrip {
         var newSuggestedDriverIds: [UUID] = []
         var newRouteStackTotalDistance: Double = Double.greatestFiniteMagnitude
         var allTripProspectCollections: [TripProspectCollection] = []
+        
+        // for each node create collection of every possible path a node can take when assumed as the driver
         for node in allNodes {
             let tripProspects = createTripProspectsForAssumedDriver(driver: node, nodeRouteMap: nodeRouteMap)
             allTripProspectCollections.append(TripProspectCollection(node: node, tripProspects: tripProspects))
@@ -130,6 +133,7 @@ class OptimizedTrip {
                     }
                 }
                 else {
+                    // (recursively) call addToTripProspectCollection
                     var theTripProspectCollections: [TripProspectCollection] = []
                     var theNodesAccountedFor: Set<UUID> = Set()
                     theTripProspectCollections.append(TripProspectCollection(node: node, tripProspects:[tripProspect]))
@@ -271,6 +275,7 @@ class OptimizedTrip {
         print(tripString)
     }
     
+    // given a set of trip 'snippets' go through all other snippets recursively to find combinations that make a 'complete' trip
     func addToTripProspectCollection(allTripProspectCollections: [TripProspectCollection], theTripProspectCollections: inout [TripProspectCollection], theNodesAccountedFor: inout Set<UUID>, allNodeIds: Set<UUID>) -> Void {
         for tripProspectCollection in allTripProspectCollections {
             if tripProspectCollectionsContainsNode(tripProspectCollections: theTripProspectCollections, node: tripProspectCollection.node) {
@@ -318,10 +323,6 @@ class OptimizedTrip {
     
     func createTripProspectsForAssumedDriver(driver: FlockNode, nodeRouteMap: [FlockNode:NodeSpecificRouteCollections]) -> [TripProspect] {
         var tripProspects: [TripProspect] = []
-        
-//        if driver.riderName == "Pataskalaman" {
-//            print("Pataskalaman")
-//        }
         
         // get routes from assumed driver
         let routesFrom: [FlockRoute] = nodeRouteMap[driver]!.from

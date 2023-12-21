@@ -3,7 +3,7 @@ import Foundation
 import SwiftUI
 import MapKit
 
-struct RiderDetailsView: View, KeyboardReadable {
+struct RiderDetailsView: View {
     @State var meProfileTitle: String = "Me"
     @Binding var rider: Rider
     @Binding var isUseSuggestedDrivers: Bool
@@ -96,9 +96,7 @@ struct RiderDetailsView: View, KeyboardReadable {
             }
             else {
                 IsDrivingToggle
-                if rider.isDriver {
-                    CapacityStack
-                }
+                CapacityStack
             }
         }
     }
@@ -153,7 +151,7 @@ struct RiderDetailsView: View, KeyboardReadable {
         HStack {
             Text("Capacity")
             Picker("Capacity", selection: $formCapacity) {
-                ForEach(1...7, id: \.self) {
+                ForEach(0...7, id: \.self) {
                     Text(String($0)).tag($0)
                 }
             }
@@ -164,4 +162,8 @@ struct RiderDetailsView: View, KeyboardReadable {
             }
         }
     }
+}
+
+#Preview {
+    HomeView()
 }

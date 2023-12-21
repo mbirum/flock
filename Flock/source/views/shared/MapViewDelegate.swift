@@ -28,12 +28,14 @@ class MapViewDelegate: NSObject, MKMapViewDelegate {
         //Set image
         switch annotation.title {
         case "source":
-            annotationView?.image = UIImage(systemName: "car.rear.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+            annotationView?.image = UIImage(named: "DriverMapIcon")
+            annotationView?.frame = CGRect(x: 0, y: 0, width: 23, height: 30)
         case "destination":
-            annotationView?.image = UIImage(systemName: "flag.checkered")
+            annotationView?.image = UIImage(named: "DestinationMapIcon")
+            annotationView?.frame = CGRect(x: 0, y: 0, width: 23, height: 30)
         default:
-            annotationView?.image = UIImage(named: "AppIcon")
-            annotationView?.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            annotationView?.image = UIImage(named: "PassengerMapIcon")
+            annotationView?.frame = CGRect(x: 0, y: 0, width: 23, height: 30)
             break
         }
         
