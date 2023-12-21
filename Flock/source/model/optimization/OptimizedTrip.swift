@@ -85,15 +85,13 @@ class OptimizedTrip {
             self.routeStack = uCacheItem.routeStack
             return
         }
-        if trip.useSuggestedDrivers {
-            optimizeRoutesForSuggestedDrivers()
-        }
-        else {
-            optimizeRoutesForSpecifiedDrivers()
-        }
+        let context = OptimizationContext(type: trip.useSuggestedDrivers ? .suggested : .specified)
+        optimizeRoutesWithContext(context: context)
     }
     
-    func optimizeRoutesForSuggestedDrivers() -> Void {
+    
+    func optimizeRoutesWithContext(context: OptimizationContext) -> Void {
+        
         // create map with the node as the key and collections of routes from and to the node as the value
         var nodeRouteMap: [FlockNode:NodeSpecificRouteCollections] = [:]
         for node in allNodes {
@@ -108,86 +106,7 @@ class OptimizedTrip {
         
         // for each node create collection of every possible path a node can take when assumed as the driver
         for node in allNodes {
-            let tripProspects = createTripProspectsForAssumedDriver(driver: node, nodeRouteMap: nodeRouteMap)
-            allTripProspectCollections.append(TripProspectCollection(node: node, tripProspects: tripProspects))
-        }
-        
-        let allNodeIds: Set<UUID> = Set(allNodes.map({$0.riderId!}))
-        
-        // for each collection per node
-        for tripProspectCollection in allTripProspectCollections {
-            let node = tripProspectCollection.node
-            let tripProspects = tripProspectCollection.tripProspects
-            
-            // for each prospect (collection of routes, regardless of completeness)
-            for tripProspect in tripProspects {
-                let nodesAccountedFor = tripProspect.nodesAccountedFor
-                let routes = tripProspect.routes
-                
-                // if prospect is already complete, compare and set as shortest
-                if SetUtility.isSetComplete(set: nodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
-                    if tripProspect.totalDistance < newRouteStackTotalDistance {
-                        newRouteStack = routes
-                        newRouteStackTotalDistance = tripProspect.totalDistance
-                        newSuggestedDriverIds = [node.riderId!]
-                    }
-                }
-                else {
-                    // (recursively) call addToTripProspectCollection
-                    var theTripProspectCollections: [TripProspectCollection] = []
-                    var theNodesAccountedFor: Set<UUID> = Set()
-                    theTripProspectCollections.append(TripProspectCollection(node: node, tripProspects:[tripProspect]))
-                    for val in nodesAccountedFor { theNodesAccountedFor.insert(val) }
-                    addToTripProspectCollection(
-                        allTripProspectCollections: allTripProspectCollections,
-                        theTripProspectCollections: &theTripProspectCollections,
-                        theNodesAccountedFor: &theNodesAccountedFor,
-                        allNodeIds: allNodeIds
-                    )
-                    if SetUtility.isSetComplete(set: theNodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
-                        var totalCombinedDistance: Double = 0
-                        var newCombinedRouteStack: [FlockRoute] = []
-                        var combinedSuggestedDriverIds: [UUID] = []
-                        for tripProspectCollection in theTripProspectCollections {
-                            combinedSuggestedDriverIds.append(tripProspectCollection.node.riderId!)
-                            for tripProspect in tripProspectCollection.tripProspects {
-                                totalCombinedDistance += tripProspect.totalDistance
-                                newCombinedRouteStack.append(contentsOf: tripProspect.routes)
-                            }
-                        }
-                        if totalCombinedDistance < newRouteStackTotalDistance {
-                            newRouteStack = newCombinedRouteStack
-                            newRouteStackTotalDistance = totalCombinedDistance
-                            newSuggestedDriverIds = combinedSuggestedDriverIds
-                        }
-                    }
-                    
-                }
-            }
-        }
-        
-        self.routeStack = newRouteStack
-        
-        // set driver based on optimized route suggestion
-        if self.routeStack.count > 0 {
-            self.suggestedDriverIds = newSuggestedDriverIds
-        }
-        printTripString()
-    }
-    
-    func optimizeRoutesForSpecifiedDrivers() -> Void {
-        var nodeRouteMap: [FlockNode:NodeSpecificRouteCollections] = [:]
-        for node in allNodes {
-            let routesFrom: [FlockRoute] = routeProspects.filter({$0.from.riderId == node.riderId})
-            let routesTo: [FlockRoute] = routeProspects.filter({$0.to.riderId == node.riderId})
-            nodeRouteMap[node] = NodeSpecificRouteCollections(from: routesFrom, to: routesTo)
-        }
-        var newRouteStack: [FlockRoute] = []
-        var newSuggestedDriverIds: [UUID] = []
-        var newRouteStackTotalDistance: Double = Double.greatestFiniteMagnitude
-        var allTripProspectCollections: [TripProspectCollection] = []
-        for node in allNodes {
-            if node.isDriver {
+            if !context.isSpecifiedType() || node.isDriver {
                 let tripProspects = createTripProspectsForAssumedDriver(driver: node, nodeRouteMap: nodeRouteMap)
                 allTripProspectCollections.append(TripProspectCollection(node: node, tripProspects: tripProspects))
             }
@@ -207,8 +126,9 @@ class OptimizedTrip {
                 
                 // if prospect is already complete, compare and set as shortest
                 if SetUtility.isSetComplete(set: nodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
-                    // we can only use a complete trip in this context if there is only 1 specified driver
-                    if trip.drivers == 1 {
+                    
+                    // we can only use a complete trip in .specified context if there is only 1 specified driver
+                    if !context.isSpecifiedType() || trip.drivers == 1 {
                         if tripProspect.totalDistance < newRouteStackTotalDistance {
                             newRouteStack = routes
                             newRouteStackTotalDistance = tripProspect.totalDistance
@@ -240,7 +160,8 @@ class OptimizedTrip {
                                 newCombinedRouteStack.append(contentsOf: tripProspect.routes)
                             }
                         }
-                        if totalDrivers == trip.drivers {
+                        // in .specified driver context only consider if total # of drivers match
+                        if !context.isSpecifiedType() || totalDrivers == trip.drivers {
                             if totalCombinedDistance < newRouteStackTotalDistance {
                                 newRouteStack = newCombinedRouteStack
                                 newRouteStackTotalDistance = totalCombinedDistance
@@ -259,20 +180,6 @@ class OptimizedTrip {
             self.suggestedDriverIds = newSuggestedDriverIds
         }
         printTripString()
-    }
-    
-    func printTripString() -> Void {
-        var tripString: String = ""
-        for i in 0..<self.routeStack.count {
-            let route = self.routeStack[i]
-            if i == self.routeStack.count-1 {
-                tripString += (self.suggestedDriverIds.contains(route.from.riderId!) ? "^" : "") + route.from.riderName + " -> " + route.to.riderName
-            }
-            else {
-                tripString += (self.suggestedDriverIds.contains(route.from.riderId!) ? "^" : "") + route.from.riderName + " -> "
-            }
-        }
-        print(tripString)
     }
     
     // given a set of trip 'snippets' go through all other snippets recursively to find combinations that make a 'complete' trip
@@ -321,6 +228,7 @@ class OptimizedTrip {
         return false
     }
     
+    // entry point for creating prospects for a starting node
     func createTripProspectsForAssumedDriver(driver: FlockNode, nodeRouteMap: [FlockNode:NodeSpecificRouteCollections]) -> [TripProspect] {
         var tripProspects: [TripProspect] = []
         
@@ -355,6 +263,8 @@ class OptimizedTrip {
         return tripProspects
     }
     
+    // recursively called as we traverse nodes to create prospects for assumed drivers
+    // go 'to' next node, then for each route going from that node, go 'to' each and continue while collecting routes
     func addToProspectForNode(node: FlockNode, nodeRouteMap: [FlockNode:NodeSpecificRouteCollections], nodesAccountedFor: inout Set<UUID>) -> [[FlockRoute]] {
         var nodeLocalProspects: [[FlockRoute]] = []
         if node.isDestination {
@@ -384,8 +294,26 @@ class OptimizedTrip {
         }
         return nodeLocalProspects
     }
+    
+    func printTripString() -> Void {
+        var tripString: String = ""
+        for i in 0..<self.routeStack.count {
+            let route = self.routeStack[i]
+            if i == self.routeStack.count-1 {
+                tripString += (self.suggestedDriverIds.contains(route.from.riderId!) ? "^" : "") + route.from.riderName + " -> " + route.to.riderName
+            }
+            else {
+                tripString += (self.suggestedDriverIds.contains(route.from.riderId!) ? "^" : "") + route.from.riderName + " -> "
+            }
+        }
+        print(tripString)
+    }
 }
 
+// a trip 'prospect' is any combination of routes that can happen from a node
+// ex. 1-->3-->2 or 1-->Destination or 2-->3, etc.
+// prospects will get collected per node and optimizeRoutes will match and add up
+// prospects from various nodes to make a complete trip
 struct TripProspect {
     var nodesAccountedFor: Set<UUID> = Set()
     var routes: [FlockRoute] = []
@@ -398,12 +326,15 @@ struct TripProspect {
     }
 }
 
+// for each node collect all the different prospects that could possibly make a complete trip
+struct TripProspectCollection {
+    var node: FlockNode
+    var tripProspects: [TripProspect]
+}
+
 struct NodeSpecificRouteCollections {
     var from: [FlockRoute]
     var to: [FlockRoute]
 }
 
-struct TripProspectCollection {
-    var node: FlockNode
-    var tripProspects: [TripProspect]
-}
+
