@@ -4,6 +4,7 @@ import MapKit
 import mbutils
 
 class OptimizedTrip {
+    static var queue: [OptimizationRequest] = []
     var trip: Trip {
         didSet {
             self.requestRoutes()
@@ -21,13 +22,22 @@ class OptimizedTrip {
         requestRoutes()
     }
     
+    static func isRequestable() -> Bool {
+        return OptimizedTrip.queue.count == 0
+    }
+    
     func requestRoutes() -> Void {
+        
         if !OptimizedTripCache.hasTripChanged(trip) {
             guard let uCacheItem = OptimizedTripCache.get(trip.id) else { return }
             self.routeStack = uCacheItem.routeStack
+            OptimizedTrip.queue = []
             return
         }
-        print("re-optimizing")
+        if OptimizedTrip.queue.count > 0 {
+            return
+        }
+        OptimizedTrip.queue.append(OptimizationRequest())
         var flockNodes: [FlockNode] = []
         for rider in trip.riders {
             flockNodes.append(FlockNode(
@@ -74,9 +84,7 @@ class OptimizedTrip {
     
     func areRouteRequestsComplete() -> Bool {
         for prospect in routeProspects {
-            guard let _ = prospect.route else {
-                return false
-            }
+            guard let _ = prospect.route else { return false }
         }
         return true
     }
@@ -85,6 +93,7 @@ class OptimizedTrip {
         if !OptimizedTripCache.hasTripChanged(trip) {
             guard let uCacheItem = OptimizedTripCache.get(trip.id) else { return }
             self.routeStack = uCacheItem.routeStack
+            OptimizedTrip.queue = []
             return
         }
         let context = OptimizationContext(type: trip.useSuggestedDrivers ? .suggested : .specified)
@@ -127,7 +136,7 @@ class OptimizedTrip {
                 let routes = tripProspect.routes
                 
                 // if prospect is already complete, compare and set as shortest
-                if SetUtility.isSetComplete(set: nodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
+                if SetUtility.isSetComplete(set: nodesAccountedFor, referenceSet: allNodeIds, exception: trip.destinationCacheID) {
                     
                     // we can only use a complete trip in .specified context if there is only 1 specified driver
                     if !context.isSpecifiedType() || trip.drivers == 1 {
@@ -149,7 +158,7 @@ class OptimizedTrip {
                         theNodesAccountedFor: &theNodesAccountedFor,
                         allNodeIds: allNodeIds
                     )
-                    if SetUtility.isSetComplete(set: theNodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
+                    if SetUtility.isSetComplete(set: theNodesAccountedFor, referenceSet: allNodeIds, exception: trip.destinationCacheID) {
                         var totalCombinedDistance: Double = 0
                         var newCombinedRouteStack: [FlockRoute] = []
                         var combinedSuggestedDriverIds: [UUID] = []
@@ -181,7 +190,8 @@ class OptimizedTrip {
         if self.routeStack.count > 0 {
             self.suggestedDriverIds = newSuggestedDriverIds
         }
-        printTripString()
+        OptimizedTrip.queue = []
+//        printTripString()
     }
     
     // given a set of trip 'snippets' go through all other snippets recursively to find combinations that make a 'complete' trip
@@ -193,7 +203,7 @@ class OptimizedTrip {
             for tripProspect in tripProspectCollection.tripProspects {
                 let nodesAccountedFor = tripProspect.nodesAccountedFor
                 
-                if SetUtility.doSetsOverlap(set1: nodesAccountedFor, set2: theNodesAccountedFor, destinationId: trip.destinationCacheID) {
+                if SetUtility.doSetsOverlap(set1: nodesAccountedFor, set2: theNodesAccountedFor, exception: trip.destinationCacheID) {
                     continue
                 }
                 
@@ -201,7 +211,7 @@ class OptimizedTrip {
                 theTripProspectCollections.append(newTripProspectCollection)
                 for val in nodesAccountedFor { theNodesAccountedFor.insert(val) }
                 
-                if SetUtility.areSetsComplete(set1: nodesAccountedFor, set2: theNodesAccountedFor, referenceSet: allNodeIds, destinationId: trip.destinationCacheID) {
+                if SetUtility.areSetsComplete(set1: nodesAccountedFor, set2: theNodesAccountedFor, referenceSet: allNodeIds, exception: trip.destinationCacheID) {
                     return
                 }
                 else {
@@ -342,4 +352,6 @@ struct NodeSpecificRouteCollections {
     var to: [FlockRoute]
 }
 
-
+struct OptimizationRequest {
+    
+}

@@ -10,27 +10,6 @@ struct Trip: Encodable, Decodable, Hashable, Identifiable {
     var riders: [Rider] = []
     var drivers: Int { riders.filter({$0.isDriver}).count }
     var passengers: Int { riders.filter({!$0.isDriver}).count }
-    var start: String {
-        get {
-            var startLocationString: String? = nil
-            for rider in riders {
-                if rider.isDriver {
-                    startLocationString = rider.location
-                    break
-                }
-            }
-            guard let uStartLocationString = startLocationString else { return DefaultMapKitLocation.locationString }
-            return uStartLocationString
-        }
-        set(newStartString) {
-            for var rider in riders {
-                if rider.isDriver {
-                    rider.location = newStartString
-                    break
-                }
-            }
-        }
-    }
     
     init(name: String, destination: String, useSuggestedDrivers: Bool, riders: [Rider] = []) {
         self.name = name

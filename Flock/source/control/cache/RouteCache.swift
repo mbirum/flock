@@ -22,6 +22,46 @@ class RouteCache: ObservableObject {
         return true
     }
     
+    static func initialize(from: Trip) -> Void {
+        let nodeCount = from.riders.count
+        let initializationLimit = (nodeCount * nodeCount) / 2
+        var flockNodes: [FlockNode] = []
+        for rider in from.riders {
+            flockNodes.append(FlockNode(
+                riderId: rider.id,
+                riderName: rider.name,
+                locationString: rider.location,
+                capacity: rider.passengerCapacity,
+                isDriver: rider.isDriver && !from.useSuggestedDrivers
+            ))
+        }
+        flockNodes.append(FlockNode(
+            riderId: from.destinationCacheID,
+            riderName: "Destination",
+            locationString: from.destination,
+            capacity: 1,
+            isDestination: true
+        ))
+        
+        var routeProspects: [FlockRoute] = []
+        
+        var initCount: Int = 0
+        forEachNode: for i in 0..<flockNodes.count {
+            if !flockNodes[i].isDestination {
+                forEveryOtherNode: for ii in 0..<flockNodes.count {
+                    if i != ii {
+                        let route: FlockRoute = FlockRoute(from: flockNodes[i], to: flockNodes[ii])
+                        routeProspects.append(route)
+                        initCount += 1
+                        if (initCount >= initializationLimit) {
+                            break forEachNode
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 }
 
 struct RouteCacheKey: Hashable {

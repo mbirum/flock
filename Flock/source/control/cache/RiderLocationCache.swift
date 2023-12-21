@@ -1,6 +1,7 @@
 
 import Foundation
 import MapKit
+import mbutils
 
 class RiderLocationCache: ObservableObject {
     
@@ -14,6 +15,11 @@ class RiderLocationCache: ObservableObject {
     
     static func put(id: UUID, locationString: String, pin: MKMapItem) -> Void {
         shared.lookup[id] = LocationCacheItem(locationString: locationString, pin: pin)
+    }
+    
+    static func hasKey(key: UUID) -> Bool {
+        guard let _ = shared.lookup[key] else { return false }
+        return true
     }
     
     static func putFromLocationString(id: UUID, locationString: String) -> Void {
@@ -40,6 +46,16 @@ class RiderLocationCache: ObservableObject {
                 RiderLocationCache.putFromLocationString(id: rider.id, locationString: rider.location)
             }
         }
+        TimerBasedConditionCheck.create(condition: {
+            for rider in from.riders {
+                if !RiderLocationCache.hasKey(key: rider.id) {
+                    return false
+                }
+            }
+            return true
+        }, complete: {
+            RouteCache.initialize(from: from)
+        })
     }
     
     static func initializeCache(from: [Trip]) -> Void {

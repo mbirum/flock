@@ -16,12 +16,16 @@ struct TripMapView: View {
                 optimizedTrip: $optimizedTrip
             )
             .onAppear(perform: {
-                self.optimizedTrip = OptimizedTrip(trip)
-                startOptimizedTripChecker()
+                if OptimizedTrip.isRequestable() {
+                    self.optimizedTrip = OptimizedTrip(trip)
+                    startOptimizedTripChecker()
+                }
             })
             .onChange(of: trip) { oldValue, newValue in
-                self.optimizedTrip = OptimizedTrip(newValue)
-                startOptimizedTripChecker()
+                if OptimizedTrip.isRequestable() {
+                    self.optimizedTrip = OptimizedTrip(newValue)
+                    startOptimizedTripChecker()
+                }
             }
             if loadOverlayPresent {
                 ProgressView()
@@ -64,15 +68,6 @@ struct TripMapView: View {
                 route.from.isDriver = true
             }
         }
-//        guard let uSuggestedDriverId = optimizedTrip?.suggestedDriverId else { return }
-//        for rider in $trip.riders {
-//            if rider.id == uSuggestedDriverId {
-//                rider.wrappedValue.isDriver = true
-//            }
-//            else {
-//                rider.wrappedValue.isDriver = false
-//            }
-//        }
     }
     
     // The trip is ready if the # of 'optimized' routes = expected # of routes

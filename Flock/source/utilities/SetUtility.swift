@@ -4,14 +4,14 @@ import SwiftUI
 
 class SetUtility {
     
-    static func isSetComplete<T>(set: Set<T>, referenceSet: Set<T>, destinationId: T) -> Bool {
-        return areSetsComplete(set1: set, set2: Set<T>(), referenceSet: referenceSet, destinationId: destinationId)
+    static func isSetComplete<T>(set: Set<T>, referenceSet: Set<T>, exception: T) -> Bool {
+        return areSetsComplete(set1: set, set2: Set<T>(), referenceSet: referenceSet, exception: exception)
     }
     
-    static func doSetsOverlap<T>(set1: Set<T>, set2: Set<T>, destinationId: T) -> Bool {
+    static func doSetsOverlap<T>(set1: Set<T>, set2: Set<T>, exception: T) -> Bool {
         for val1 in set1 {
             for val2 in set2 {
-                if val1 == destinationId && val2 == destinationId {
+                if val1 == exception && val2 == exception {
                     continue
                 }
                 if val1 == val2 {
@@ -22,9 +22,9 @@ class SetUtility {
         return false
     }
     
-    static func areSetsComplete<T>(set1: Set<T>, set2: Set<T>, referenceSet: Set<T>, destinationId: T) -> Bool {
+    static func areSetsComplete<T>(set1: Set<T>, set2: Set<T>, referenceSet: Set<T>, exception: T) -> Bool {
         // sets cant share values
-        if doSetsOverlap(set1: set1, set2: set2, destinationId: destinationId) {
+        if doSetsOverlap(set1: set1, set2: set2, exception: exception) {
             return false
         }
         

@@ -8,7 +8,6 @@ class OptimizedTripCache: ObservableObject {
     @Published var lookup:[UUID: OptimizedTripCacheItem] = [:]
     
     static func get(_ id: UUID) -> OptimizedTripCacheItem? {
-        print("getting from cache")
         return shared.lookup[id]
     }
     
