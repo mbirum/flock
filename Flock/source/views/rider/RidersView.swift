@@ -82,7 +82,7 @@ struct RidersView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .background(Color("ButtonColor"))
+            .background(Color("AccentColor"))
             .foregroundStyle(.white)
             .cornerRadius(8)
         }

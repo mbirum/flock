@@ -65,7 +65,7 @@ struct TripDetailsView: View, KeyboardReadable {
         Form {
             Section {
                 HStack {
-                    Image(systemName: "location.fill").foregroundStyle(Color("ButtonColor"))
+                    Image(systemName: "location.fill").foregroundStyle(Color("AccentColor"))
                     Text(trip.destination).font(.subheadline).foregroundStyle(.gray).lineLimit(1).baselineOffset(-2.0)
                     Spacer()
                 }

@@ -5,7 +5,7 @@ import MapKit
 class MapViewDelegate: NSObject, MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKPolylineRenderer(overlay: overlay)
-        renderer.strokeColor = UIColor(named: "ButtonColor")
+        renderer.strokeColor = UIColor(named: "AccentColor")
         renderer.lineWidth = 5.0
         return renderer
     }

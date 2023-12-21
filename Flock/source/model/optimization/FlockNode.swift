@@ -23,29 +23,33 @@ class FlockNode: NSObject {
     }
     var isDriver: Bool = false
     var isDestination: Bool = false
+    var capacity: Int
     @objc dynamic var pin: MKMapItem?
     
-    init(riderId: UUID?, riderName: String, locationString: String) {
+    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
+        self.capacity = capacity
         super.init()
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, isDriver: Bool) {
+    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int, isDriver: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
+        self.capacity = capacity
         self.isDriver = isDriver
         super.init()
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, isDestination: Bool) {
+    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int, isDestination: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
+        self.capacity = capacity
         self.isDestination = isDestination
         super.init()
         requestPin()

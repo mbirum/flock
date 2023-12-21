@@ -27,13 +27,14 @@ class OptimizedTrip {
             self.routeStack = uCacheItem.routeStack
             return
         }
-        
+        print("re-optimizing")
         var flockNodes: [FlockNode] = []
         for rider in trip.riders {
             flockNodes.append(FlockNode(
                 riderId: rider.id,
                 riderName: rider.name,
                 locationString: rider.location,
+                capacity: rider.passengerCapacity,
                 isDriver: rider.isDriver && !trip.useSuggestedDrivers
             ))
         }
@@ -41,6 +42,7 @@ class OptimizedTrip {
             riderId: trip.destinationCacheID,
             riderName: "Destination",
             locationString: trip.destination,
+            capacity: 1,
             isDestination: true
         ))
         
@@ -256,7 +258,10 @@ class OptimizedTrip {
                     localNodesAccountedFor.insert(flockRoute.from.riderId!)
                     localNodesAccountedFor.insert(flockRoute.to.riderId!)
                 }
-                tripProspects.append(TripProspect(nodesAccountedFor: localNodesAccountedFor, routes: combinedChildProspects))
+                // only add the prospect if its less than or equal to capacity
+                if combinedChildProspects.count <= driver.capacity {
+                    tripProspects.append(TripProspect(nodesAccountedFor: localNodesAccountedFor, routes: combinedChildProspects))
+                }
             }
         }
         

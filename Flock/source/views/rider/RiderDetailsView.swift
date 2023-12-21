@@ -80,7 +80,7 @@ struct RiderDetailsView: View {
                 rider.phoneNumber = formPhone
             }
             HStack {
-                Image(systemName: "location.fill").foregroundStyle(Color("ButtonColor"))
+                Image(systemName: "location.fill").foregroundStyle(Color("AccentColor"))
                 Text(rider.location).font(.subheadline).foregroundStyle(.gray).lineLimit(1).baselineOffset(-2.0)
                 Spacer()
             }
@@ -151,7 +151,7 @@ struct RiderDetailsView: View {
         HStack {
             Text("Capacity")
             Picker("Capacity", selection: $formCapacity) {
-                ForEach(0...7, id: \.self) {
+                ForEach(1...8, id: \.self) {
                     Text(String($0)).tag($0)
                 }
             }
