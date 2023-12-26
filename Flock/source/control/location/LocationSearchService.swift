@@ -50,12 +50,18 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
         directions.calculate {
             response, error in
             guard let uResponse = response else { return }
-            if let route = uResponse.routes.first {
+            var theRoute = uResponse.routes.first
+            for route in uResponse.routes {
+                if route.expectedTravelTime < theRoute!.expectedTravelTime {
+                    theRoute = route
+                }
+            }
+//            if let route = uResponse.routes.first {
                 RouteCache.put(
                     key: RouteCacheKey(source: source.placemark.title!, destination: destination.placemark.title!),
-                    route: route)
-                routeHandler(source, destination, route)
-            }
+                    route: theRoute!)
+                routeHandler(source, destination, theRoute!)
+//            }
         }
     }
     

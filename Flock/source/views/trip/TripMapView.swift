@@ -7,7 +7,7 @@ struct TripMapView: View {
     @Binding var trip: Trip
     @State var loadOverlayPresent: Bool = false
     @State var invalidateView: Bool = false
-    @State var optimizedTrip: OptimizedTrip? = nil
+    @Binding var optimizedTrip: OptimizedTrip?
     
     var body: some View {
         ZStack {
@@ -88,71 +88,71 @@ struct TripMapView: View {
 
 
 // inner MapKit 'representable' view
-struct TripMapViewRepresentable: UIViewRepresentable {
-    
-    @Binding var invalidateView: Bool
-    @Binding var optimizedTrip: OptimizedTrip?
-    
-    var mapViewDelegate: MapViewDelegate = MapViewDelegate()
-    
-    func getRegion() -> MKCoordinateRegion {
-        return DefaultMapKitLocation.region
-    }
-    
-    func updateUIView(_ view: MKMapView, context: Context) {
-        for annotation in view.annotations {
-            view.removeAnnotation(annotation)
-        }
-        for overlay in view.overlays {
-            view.removeOverlay(overlay)
-        }
-        view.delegate = mapViewDelegate
-        view.setRegion(getRegion(), animated: true)
-        view.setVisibleMapRect(
-            DefaultMapKitLocation.rect,
-            edgePadding: UIEdgeInsets.init(top: 100.0, left: 50.0, bottom: 100.0, right: 50.0),
-            animated: true
-        )
-        
-        guard let uOptimizedTrip = optimizedTrip else { return }
-        
-        var minX: Double = Double.greatestFiniteMagnitude
-        var minY: Double = Double.greatestFiniteMagnitude
-        var width: Double = 0
-        var height: Double = 0
-        for flockRoute in uOptimizedTrip.routeStack {
-            guard let uFlockRoute = flockRoute.route, 
-                    let uFlockFromPin = flockRoute.from.pin,
-                    let uFlockToPin = flockRoute.to.pin
-            else {
-                continue
-            }
-
-            view.addOverlay(uFlockRoute.polyline)
-            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
-            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
-            
-            // for each route, find the one with the largest boundingRect and use as whole view rect
-            let rect = uFlockRoute.polyline.boundingMapRect
-            if rect.origin.x < minX { minX = rect.origin.x }
-            if rect.origin.y < minY { minY = rect.origin.y }
-            if rect.width > width { width = rect.width }
-            if rect.height > height { height = rect.height }
-            
-        }
-        let rect: MKMapRect = MKMapRect(origin: MKMapPoint(x: minX, y: minY),size: MKMapSize(width: width, height: height))
-        view.setVisibleMapRect(rect, edgePadding: UIEdgeInsets.init(top: 90.0, left: 75.0, bottom: 75.0, right: 75.0), animated: true)
-    }
-    
-    func makeUIView(context: Context) -> MKMapView {
-        let mapView = MKMapView()
-        updateUIView(mapView, context: context)
-        return mapView
-    }
-    
-}
-
-
+//struct TripMapViewRepresentable: UIViewRepresentable {
+//    
+//    @Binding var invalidateView: Bool
+//    @Binding var optimizedTrip: OptimizedTrip?
+//    
+//    var mapViewDelegate: MapViewDelegate = MapViewDelegate()
+//    
+//    func getRegion() -> MKCoordinateRegion {
+//        return DefaultMapKitLocation.region
+//    }
+//    
+//    func updateUIView(_ view: MKMapView, context: Context) {
+//        for annotation in view.annotations {
+//            view.removeAnnotation(annotation)
+//        }
+//        for overlay in view.overlays {
+//            view.removeOverlay(overlay)
+//        }
+//        view.delegate = mapViewDelegate
+//        view.setRegion(getRegion(), animated: true)
+//        view.setVisibleMapRect(
+//            DefaultMapKitLocation.rect,
+//            edgePadding: UIEdgeInsets.init(top: 100.0, left: 50.0, bottom: 100.0, right: 50.0),
+//            animated: true
+//        )
+//        
+//        guard let uOptimizedTrip = optimizedTrip else { return }
+//        
+//        var minX: Double = Double.greatestFiniteMagnitude
+//        var minY: Double = Double.greatestFiniteMagnitude
+//        var width: Double = 0
+//        var height: Double = 0
+//        for flockRoute in uOptimizedTrip.routeStack {
+//            guard let uFlockRoute = flockRoute.route, 
+//                    let uFlockFromPin = flockRoute.from.pin,
+//                    let uFlockToPin = flockRoute.to.pin
+//            else {
+//                continue
+//            }
+//
+//            view.addOverlay(uFlockRoute.polyline)
+//            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
+//            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
+//            
+//            // for each route, find the one with the largest boundingRect and use as whole view rect
+//            let rect = uFlockRoute.polyline.boundingMapRect
+//            if rect.origin.x < minX { minX = rect.origin.x }
+//            if rect.origin.y < minY { minY = rect.origin.y }
+//            if rect.width > width { width = rect.width }
+//            if rect.height > height { height = rect.height }
+//            
+//        }
+//        let rect: MKMapRect = MKMapRect(origin: MKMapPoint(x: minX, y: minY),size: MKMapSize(width: width, height: height))
+//        view.setVisibleMapRect(rect, edgePadding: UIEdgeInsets.init(top: 90.0, left: 75.0, bottom: 75.0, right: 75.0), animated: true)
+//    }
+//    
+//    func makeUIView(context: Context) -> MKMapView {
+//        let mapView = MKMapView()
+//        updateUIView(mapView, context: context)
+//        return mapView
+//    }
+//    
+//}
+//
+//
 
 
 #Preview {

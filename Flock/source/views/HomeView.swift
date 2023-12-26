@@ -57,7 +57,7 @@ struct HomeView: View {
         List {
             ForEach($tripData.trips) { $trip in
                 NavigationLink(destination: {
-                    TripDetailsView(trip: $trip)
+                    TripOverviewView(trip: $trip)
                 }) {
                     VStack {
                         HStack {

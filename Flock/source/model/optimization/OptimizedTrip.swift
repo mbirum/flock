@@ -3,7 +3,7 @@ import Foundation
 import MapKit
 import mbutils
 
-class OptimizedTrip {
+class OptimizedTrip: Equatable {
     static var queue: [OptimizationRequest] = []
     var trip: Trip {
         didSet {
@@ -134,13 +134,16 @@ class OptimizedTrip {
             for tripProspect in tripProspects {
                 let nodesAccountedFor = tripProspect.nodesAccountedFor
                 let routes = tripProspect.routes
-                
+
                 // if prospect is already complete, compare and set as shortest
                 if SetUtility.isSetComplete(set: nodesAccountedFor, referenceSet: allNodeIds, exception: trip.destinationCacheID) {
                     
                     // we can only use a complete trip in .specified context if there is only 1 specified driver
                     if !context.isSpecifiedType() || trip.drivers == 1 {
                         if tripProspect.totalDistance < newRouteStackTotalDistance {
+                            for route in routes {
+                                route.setDriver(node)
+                            }
                             newRouteStack = routes
                             newRouteStackTotalDistance = tripProspect.totalDistance
                             newSuggestedDriverIds = [node.riderId!]
@@ -168,12 +171,18 @@ class OptimizedTrip {
                             combinedSuggestedDriverIds.append(tripProspectCollection.node.riderId!)
                             for tripProspect in tripProspectCollection.tripProspects {
                                 totalCombinedDistance += tripProspect.totalDistance
+                                for route in tripProspect.routes {
+                                    route.setProposedDriver(tripProspectCollection.node)
+                                }
                                 newCombinedRouteStack.append(contentsOf: tripProspect.routes)
                             }
                         }
                         // in .specified driver context only consider if total # of drivers match
                         if !context.isSpecifiedType() || totalDrivers == trip.drivers {
                             if totalCombinedDistance < newRouteStackTotalDistance {
+                                for route in newCombinedRouteStack {
+                                    route.setDriver(route.proposedDriver)
+                                }
                                 newRouteStack = newCombinedRouteStack
                                 newRouteStackTotalDistance = totalCombinedDistance
                                 newSuggestedDriverIds = combinedSuggestedDriverIds
@@ -274,7 +283,6 @@ class OptimizedTrip {
                 }
             }
         }
-        
         return tripProspects
     }
     
@@ -283,7 +291,6 @@ class OptimizedTrip {
     func addToProspectForNode(node: FlockNode, nodeRouteMap: [FlockNode:NodeSpecificRouteCollections], nodesAccountedFor: inout Set<UUID>) -> [[FlockRoute]] {
         var nodeLocalProspects: [[FlockRoute]] = []
         if node.isDestination {
-//            nodesAccountedFor.insert(node.riderId!)
             return nodeLocalProspects
         }
         let routesFrom: [FlockRoute] = nodeRouteMap[node]!.from
@@ -323,6 +330,23 @@ class OptimizedTrip {
         }
         print(tripString)
     }
+    
+    static func == (lhs: OptimizedTrip, rhs: OptimizedTrip) -> Bool {
+        if lhs.routeStack.count != rhs.routeStack.count {
+            return false
+        }
+        for route in lhs.routeStack {
+            if !rhs.routeStack.contains(route) {
+                return false
+            }
+        }
+        for route in rhs.routeStack {
+            if !lhs.routeStack.contains(route) {
+                return false
+            }
+        }
+        return true
+    }
 }
 
 // a trip 'prospect' is any combination of routes that can happen from a node
@@ -335,7 +359,8 @@ struct TripProspect {
     var totalDistance: Double {
         var distance: Double = 0
         for route in routes {
-            distance += route.distance
+//            distance += route.distance
+            distance += route.route?.expectedTravelTime ?? 0
         }
         return distance
     }
