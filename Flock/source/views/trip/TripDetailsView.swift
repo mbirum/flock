@@ -21,35 +21,35 @@ struct TripDetailsView: View {
                             }
                             .font(.system(size: 20))
                             .padding(.bottom,5)
-//                            Divider()
-                            ForEach(optimizedTrip?.routeStack ?? [], id: \.self) { route in
-                                if route.driver.riderId == rider.id {
-                                    VStack {
-                                        HStack {
-                                            Image(systemName: "arrow.turn.right.down")
-                                                .font(.system(size:13))
-                                            Text("")
-                                            Spacer()
-                                        }
-                                        .contentShape(Rectangle())
-//                                        .padding(.vertical,0.5)
-                                        HStack {
-                                            if route.to.isDestination {
-                                                Image(systemName: "flag.checkered")
+                            ForEach(optimizedTrip?.tripVariations ?? [], id: \.self) { variation in
+                                ForEach(variation.routes, id: \.self) { route in
+                                    if route.driver.riderId == rider.id {
+                                        VStack {
+                                            HStack {
+                                                Image(systemName: "arrow.turn.right.down")
                                                     .font(.system(size:13))
-                                                Text(route.to.locationString).lineLimit(1)
+                                                Text("")
+                                                Spacer()
                                             }
-                                            else {
-                                                Image(systemName: "circle")
-                                                    .padding(.trailing, 1)
-                                                    .font(.system(size:11))
-                                                Text(route.to.riderName)
+                                            .contentShape(Rectangle())
+
+                                            HStack {
+                                                if route.to.isDestination {
+                                                    Image(systemName: "flag.checkered")
+                                                        .font(.system(size:13))
+                                                    Text(route.to.locationString).lineLimit(1)
+                                                }
+                                                else {
+                                                    Image(systemName: "circle")
+                                                        .padding(.trailing, 1)
+                                                        .font(.system(size:11))
+                                                    Text(route.to.riderName)
+                                                }
+                                                Spacer()
                                             }
-                                            Spacer()
                                         }
+                                        .font(.system(size: 16))
                                     }
-                                    .font(.system(size: 16))
-//                                    .padding(.vertical, 4)
                                 }
                             }
                         }

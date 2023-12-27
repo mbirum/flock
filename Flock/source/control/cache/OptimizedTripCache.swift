@@ -11,9 +11,9 @@ class OptimizedTripCache: ObservableObject {
         return shared.lookup[id]
     }
     
-    static func put(trip: Trip, routeStack: [FlockRoute]) -> Void {
+    static func put(trip: Trip, optimizedTrip: OptimizedTrip) -> Void {
         let tripComparison: TripComparison = getComparisonObjectForTrip(trip)
-        shared.lookup[trip.id] = OptimizedTripCacheItem(tripComparison: tripComparison, routeStack: routeStack)
+        shared.lookup[trip.id] = OptimizedTripCacheItem(tripComparison: tripComparison, optimizedTrip: optimizedTrip)
     }
     
     
@@ -49,7 +49,7 @@ class OptimizedTripCache: ObservableObject {
 
 struct OptimizedTripCacheItem {
     var tripComparison: TripComparison
-    var routeStack: [FlockRoute]
+    var optimizedTrip: OptimizedTrip
 }
 
 struct TripComparison: Equatable {

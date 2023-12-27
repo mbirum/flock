@@ -26,14 +26,14 @@ struct TripOverviewView: View, KeyboardReadable {
                 DetailsForm
                 MapModule
                     .onAppear(perform: {
-                        if OptimizedTrip.isRequestable() {
-                            self.optimizedTrip = OptimizedTrip(trip)
+                        if TripOptimizer.isFree() {
+                            TripOptimizer.optimize(trip)
                             startOptimizedTripChecker()
                         }
                     })
                     .onChange(of: trip) { oldValue, newValue in
-                        if OptimizedTrip.isRequestable() {
-                            self.optimizedTrip = OptimizedTrip(newValue)
+                        if TripOptimizer.isFree() {
+                            TripOptimizer.optimize(newValue)
                             startOptimizedTripChecker()
                         }
                     }
@@ -70,50 +70,45 @@ struct TripOverviewView: View, KeyboardReadable {
     func startOptimizedTripChecker() -> Void {
         loadOverlayPresent = true
         TimerBasedConditionCheck.create(condition: {
-            return self.isOptimizedTripReady(self.optimizedTrip!)
+            return TripOptimizer.isRequestComplete()
         }, complete: {
+            guard let optimizedTrip = TripOptimizer.getOptimizedTrip() else { return }
             if trip.useSuggestedDrivers {
+                // TODO
                 setNewSuggestedDriver()
             }
-            OptimizedTripCache.put(trip: trip, routeStack: self.optimizedTrip!.routeStack)
+            self.optimizedTrip = optimizedTrip
+            OptimizedTripCache.put(trip: trip, optimizedTrip: optimizedTrip)
+            TripOptimizer.queue.clear()
             invalidateView.toggle()
             loadOverlayPresent = false
         })
     }
     
     func setNewSuggestedDriver() -> Void {
-        guard let uSuggestedDriverIds = optimizedTrip?.suggestedDriverIds else { return }
-        if uSuggestedDriverIds.count == 0 {
+        guard let uOptimizedTrip = optimizedTrip else { return }
+        var suggestedDriverIds: [UUID] = []
+        for variation in uOptimizedTrip.tripVariations {
+            guard let driver = variation.driver else { continue }
+            suggestedDriverIds.append(driver.riderId)
+        }
+        if suggestedDriverIds.isEmpty {
             return
         }
         for rider in $trip.riders {
-            if uSuggestedDriverIds.contains(rider.id) {
+            if suggestedDriverIds.contains(rider.id) {
                 rider.wrappedValue.isDriver = true
             }
             else {
                 rider.wrappedValue.isDriver = false
             }
         }
-        guard let uRouteStack = optimizedTrip?.routeStack else { return }
-        for route in uRouteStack {
-            if uSuggestedDriverIds.contains(route.from.riderId!) {
-                route.from.isDriver = true
-            }
-        }
-    }
-    
-    // The trip is ready if the # of 'optimized' routes = expected # of routes
-    // AND each optimized route has a route, from.pin, and to.pin set
-    func isOptimizedTripReady(_ optimizedTrip: OptimizedTrip) -> Bool {
-        if optimizedTrip.routeStack.count < (optimizedTrip.trip.passengers + 1) {
-            return false
-        }
-        for flockRoute in optimizedTrip.routeStack {
-            guard let _ = flockRoute.route, let _ = flockRoute.from.pin, let _ = flockRoute.to.pin else {
-                return false
-            }
-        }
-        return true
+        uOptimizedTrip.setDrivers()
+//        for variation in uOptimizedTrip.tripVariations {
+//            if uSuggestedDriverIds.contains(route.from.riderId!) {
+//                route.from.isDriver = true
+//            }
+//        }
     }
     
     var SubHeader: some View {
@@ -303,27 +298,31 @@ struct TripMapViewRepresentable: UIViewRepresentable {
         var minY: Double = Double.greatestFiniteMagnitude
         var width: Double = 0
         var height: Double = 0
-        for flockRoute in uOptimizedTrip.routeStack {
-            guard let uFlockRoute = flockRoute.route,
-                    let uFlockFromPin = flockRoute.from.pin,
-                    let uFlockToPin = flockRoute.to.pin
-            else {
-                continue
-            }
+        for tripVariation in uOptimizedTrip.tripVariations {
+            for flockRoute in tripVariation.routes {
+                guard let uFlockRoute = flockRoute.route,
+                        let uFlockFromPin = flockRoute.from.pin,
+                        let uFlockToPin = flockRoute.to.pin
+                else {
+                    continue
+                }
 
-            view.addOverlay(uFlockRoute.polyline)
-            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
-            view.addAnnotation(MKPointAnnotation(__coordinate: uFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
-            
-            // for each route, find the one with the largest boundingRect and use as whole view rect
-            let rect = uFlockRoute.polyline.boundingMapRect
-            if rect.origin.x < minX { minX = rect.origin.x }
-            if rect.origin.y < minY { minY = rect.origin.y }
-            if rect.width > width { width = rect.width }
-            if rect.height > height { height = rect.height }
-            
+                view.addOverlay(uFlockRoute.polyline)
+                view.addAnnotation(MKPointAnnotation(__coordinate: uFlockFromPin.placemark.coordinate, title: flockRoute.from.annotationType, subtitle: ""))
+                view.addAnnotation(MKPointAnnotation(__coordinate: uFlockToPin.placemark.coordinate, title: flockRoute.to.annotationType, subtitle: ""))
+                
+                // for each route, find the one with the largest boundingRect and use as whole view rect
+                let rect = uFlockRoute.polyline.boundingMapRect
+                if rect.origin.x < minX { minX = rect.origin.x }
+                if rect.origin.y < minY { minY = rect.origin.y }
+                if rect.width > width { width = rect.width }
+                if rect.height > height { height = rect.height }
+            }
         }
-        let rect: MKMapRect = MKMapRect(origin: MKMapPoint(x: minX, y: minY),size: MKMapSize(width: width, height: height))
+        let rect: MKMapRect = MKMapRect(
+            origin: MKMapPoint(x: minX, y: minY),
+            size: MKMapSize(width: width, height: height)
+        )
         view.setVisibleMapRect(rect, edgePadding: UIEdgeInsets.init(top: 90.0, left: 75.0, bottom: 75.0, right: 75.0), animated: true)
     }
     

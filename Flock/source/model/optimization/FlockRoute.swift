@@ -3,6 +3,7 @@ import Foundation
 import MapKit
 
 class FlockRoute: NSObject {
+    var id: UUID = UUID()
     @objc var from: FlockNode
     @objc var to: FlockNode
     var driver: FlockNode

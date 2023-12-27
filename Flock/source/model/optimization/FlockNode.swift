@@ -3,7 +3,7 @@ import Foundation
 import MapKit
 
 class FlockNode: NSObject {
-    var riderId: UUID?
+    var riderId: UUID
     var riderName: String
     var locationString: String {
         didSet {
@@ -26,7 +26,7 @@ class FlockNode: NSObject {
     var capacity: Int
     @objc dynamic var pin: MKMapItem?
     
-    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int) {
+    init(riderId: UUID, riderName: String, locationString: String, capacity: Int) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
@@ -35,7 +35,7 @@ class FlockNode: NSObject {
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int, isDriver: Bool) {
+    init(riderId: UUID, riderName: String, locationString: String, capacity: Int, isDriver: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
@@ -45,7 +45,7 @@ class FlockNode: NSObject {
         requestPin()
     }
     
-    init(riderId: UUID?, riderName: String, locationString: String, capacity: Int, isDestination: Bool) {
+    init(riderId: UUID, riderName: String, locationString: String, capacity: Int, isDestination: Bool) {
         self.riderId = riderId
         self.riderName = riderName
         self.locationString = locationString
@@ -58,8 +58,7 @@ class FlockNode: NSObject {
     func requestPin() -> Void {
         // if location hasnt changed in cache, return cached item
         if !RiderLocationCache.hasLocationChanged(id: self.riderId, locationString: self.locationString) {
-            guard let uRiderId = riderId else { return }
-            guard let uCacheItem = RiderLocationCache.get(uRiderId) else { return }
+            guard let uCacheItem = RiderLocationCache.get(riderId) else { return }
             self.pin = nil
             self.pin = uCacheItem.pin
         }
@@ -68,8 +67,7 @@ class FlockNode: NSObject {
                 location: self.locationString,
                 mapItemHandler: { item in
                     self.pin = item
-                    guard let uRiderId = self.riderId else { return }
-                    RiderLocationCache.put(id: uRiderId, locationString: self.locationString, pin: item)
+                    RiderLocationCache.put(id: self.riderId, locationString: self.locationString, pin: item)
                 }
             )
         }
