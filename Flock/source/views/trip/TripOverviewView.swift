@@ -197,7 +197,6 @@ struct TripOverviewView: View, KeyboardReadable {
     
     var MapModule: some View {
         ZStack {
-//            TripMapView(trip: $trip, optimizedTrip: $optimizedTrip)
             ZStack {
                 TripMapViewRepresentable(
                     invalidateView: $invalidateView,
@@ -232,7 +231,6 @@ struct TripOverviewView: View, KeyboardReadable {
             .padding(18)
             .padding(.top, 5)
             .padding(.trailing, 5)
-//            TripMapView(trip: $trip, optimizedTrip: $optimizedTrip)
             ZStack {
                 TripMapViewRepresentable(
                     invalidateView: $invalidateView,
