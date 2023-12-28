@@ -47,6 +47,20 @@ class TripVariation: Hashable {
         return false
     }
     
+    func isOverlappingWithOthers(others: [TripVariation]) -> Bool {
+        for node in self.allNodes {
+            if node.isDestination {
+                continue
+            }
+            for other in others {
+                if other.contains(node) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
     static func == (lhs: TripVariation, rhs: TripVariation) -> Bool {
         if lhs.routes.count != rhs.routes.count {
             return false

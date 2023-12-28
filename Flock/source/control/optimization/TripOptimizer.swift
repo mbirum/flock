@@ -135,16 +135,50 @@ class TripOptimizer {
         for variation in allVariations {
             let optimizedTrips = findOptimizedTripsForVariation(variation: variation, allVariations: allVariations)
             for optimizedTrip in optimizedTrips {
-                if optimizedTrip.totalTime < fastestTrip.totalTime {
-                    fastestTrip = optimizedTrip
+                if !context.isSpecifiedType() || optimizedTrip.tripVariations.count == request.trip.drivers {
+                    if optimizedTrip.totalTime < fastestTrip.totalTime {
+                        fastestTrip = optimizedTrip
+                    }
                 }
             }
         }
         request.optimizedTrip = fastestTrip
-        print("")
-        print("Finding Fastest Trip...")
-        for tripVariation in fastestTrip.tripVariations {
-            printTripVariation(tripVariation)
+    }
+    
+    //@entry @create
+    static func findVariationsForAssumedDriver(driver: FlockNode) -> [TripVariation] {
+        var variations: [TripVariation] = []
+        completeVariationsForAssumedDriver(
+            currentNode: driver,
+            precedingVariation: TripVariation(),
+            completeVariations: &variations
+        )
+        return variations
+    }
+    
+    //@recursive @create
+    static func completeVariationsForAssumedDriver(currentNode: FlockNode, precedingVariation: TripVariation, completeVariations: inout [TripVariation]) -> Void {
+        guard let request = queue.getNext() else { return }
+        if currentNode.isDestination {
+            let completeVariation = TripVariation(routes: precedingVariation.routes)
+            guard let driver = completeVariation.driver else { return }
+            if completeVariation.routes.count <= driver.capacity {
+                completeVariations.append(completeVariation)
+            }
+            return
+        }
+        let routesFrom = request.nodeMap[currentNode] ?? []
+        for route in routesFrom {
+            if precedingVariation.contains(route.to) {
+                continue
+            }
+            let newPrecedingVariation = TripVariation(routes: precedingVariation.routes)
+            newPrecedingVariation.routes.append(route)
+            completeVariationsForAssumedDriver(
+                currentNode: route.to,
+                precedingVariation: newPrecedingVariation,
+                completeVariations: &completeVariations
+            )
         }
     }
     
@@ -168,68 +202,17 @@ class TripOptimizer {
             return
         }
         for variation in allVariations {
-            if currentVariations.contains(variation) {
-//                print("variation already in use. skipping...")
+            if currentVariations.contains(variation) ||
+                variation.isOverlappingWithOthers(others: currentVariations) {
                 continue
             }
-            if !doesVariationOverlapWithOthers(variation: variation, otherVariations: currentVariations) {
-//                print("appending variation and recursing")
-                var newVariations: [TripVariation] = []
-                newVariations.append(contentsOf: currentVariations)
-                newVariations.append(variation)
-                completeOptimizedTripsForVariation(
-                    allVariations: allVariations,
-                    currentVariations: newVariations,
-                    completeTrips: &completeTrips
-                )
-            }
-        }
-    }
-    
-    static func doesVariationOverlapWithOthers(variation: TripVariation, otherVariations: [TripVariation]) -> Bool {
-        for node in variation.allNodes {
-            if node.isDestination {
-                continue
-            }
-            for otherVariation in otherVariations {
-                if otherVariation.contains(node) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-    
-    //@entry @create
-    static func findVariationsForAssumedDriver(driver: FlockNode) -> [TripVariation] {
-        var variations: [TripVariation] = []
-        completeVariationsForAssumedDriver(
-            currentNode: driver,
-            precedingVariation: TripVariation(),
-            completeVariations: &variations
-        )
-        return variations
-    }
-    
-    //@recursive @create
-    static func completeVariationsForAssumedDriver(currentNode: FlockNode, precedingVariation: TripVariation, completeVariations: inout [TripVariation]) -> Void {
-        guard let request = queue.getNext() else { return }
-        if currentNode.isDestination {
-            let completeVariation = TripVariation(routes: precedingVariation.routes)
-            completeVariations.append(completeVariation)
-            return
-        }
-        let routesFrom = request.nodeMap[currentNode] ?? []
-        for route in routesFrom {
-            if precedingVariation.contains(route.to) {
-                continue
-            }
-            let newPrecedingVariation = TripVariation(routes: precedingVariation.routes)
-            newPrecedingVariation.routes.append(route)
-            completeVariationsForAssumedDriver(
-                currentNode: route.to,
-                precedingVariation: newPrecedingVariation,
-                completeVariations: &completeVariations
+            var newVariations: [TripVariation] = []
+            newVariations.append(contentsOf: currentVariations)
+            newVariations.append(variation)
+            completeOptimizedTripsForVariation(
+                allVariations: allVariations,
+                currentVariations: newVariations,
+                completeTrips: &completeTrips
             )
         }
     }

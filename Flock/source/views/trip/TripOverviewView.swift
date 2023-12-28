@@ -73,11 +73,10 @@ struct TripOverviewView: View, KeyboardReadable {
             return TripOptimizer.isRequestComplete()
         }, complete: {
             guard let optimizedTrip = TripOptimizer.getOptimizedTrip() else { return }
+            self.optimizedTrip = optimizedTrip
             if trip.useSuggestedDrivers {
-                // TODO
                 setNewSuggestedDriver()
             }
-            self.optimizedTrip = optimizedTrip
             OptimizedTripCache.put(trip: trip, optimizedTrip: optimizedTrip)
             TripOptimizer.queue.clear()
             invalidateView.toggle()
@@ -104,11 +103,6 @@ struct TripOverviewView: View, KeyboardReadable {
             }
         }
         uOptimizedTrip.setDrivers()
-//        for variation in uOptimizedTrip.tripVariations {
-//            if uSuggestedDriverIds.contains(route.from.riderId!) {
-//                route.from.isDriver = true
-//            }
-//        }
     }
     
     var SubHeader: some View {
