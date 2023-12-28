@@ -35,7 +35,7 @@ struct TripStepsView: View {
                                     if route.to.isDestination {
                                         Image(systemName: "flag.checkered")
                                             .font(.system(size:13))
-                                        Text(route.to.locationString).lineLimit(1)
+                                        Text(route.to.locationString).lineLimit(1).bold()
                                     }
                                     else {
                                         Image(systemName: "circle")

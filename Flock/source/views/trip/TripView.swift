@@ -5,13 +5,10 @@ import MapKit
 import mbutils
 
 struct TripView: View, KeyboardReadable {
-    @State var isSuggestedDriverTooltipPresent: Bool = false
-    @State var isKeyboardVisible: Bool = false
-    @State var isSearchPresent: Bool = true
-    @State var isLocationSearchSheetPresent: Bool = false
-    @State var isTitlePopoverPresent: Bool = false
-    @State var isMapViewPresent: Bool = false
+    
     @Binding var trip: Trip
+    
+    @State var isMapViewPresent: Bool = false
     @State var optimizedTrip: OptimizedTrip? = nil
     @State var loadOverlayPresent: Bool = false
     @State var invalidateView: Bool = false
@@ -19,50 +16,22 @@ struct TripView: View, KeyboardReadable {
     var body: some View {
         NavigationStack {
             VStack {
-                CustomNavTitle(title: $trip.name, divide: false, isEditable: true, onTap: {
-                    isTitlePopoverPresent.toggle()
-                })
+                NavTitle
                 SubHeader
-                DetailsForm
                 MapModule
-                    .onAppear(perform: {
-                        if TripOptimizer.isFree() {
-                            TripOptimizer.optimize(trip)
-                            startOptimizedTripChecker()
-                        }
-                    })
-                    .onChange(of: trip) { oldValue, newValue in
-                        if TripOptimizer.isFree() {
-                            TripOptimizer.optimize(newValue)
-                            startOptimizedTripChecker()
-                        }
-                    }
-            
             }
-            .onAppear(perform: {
-                if trip.useSuggestedDrivers {
-                    if trip.drivers == 0 {
-                        for rider in $trip.riders {
-                            rider.wrappedValue.isDriver = true
-                            break
-                        }
-                    }
-                }
-            })
-            .sheet(isPresented: $isTitlePopoverPresent) {
-                GenericTextFieldSheet(label: "Name", field: $trip.name, isPresent: $isTitlePopoverPresent)
-            }
-            
-            .sheet(isPresented: $isLocationSearchSheetPresent) {
-                LocationSheet
-            }
-            
-            .popover(isPresented: $isMapViewPresent) {
-                LargeMapModule
-            }
-            
+            OnAppear
+            Sheets
         }
-        .ignoresSafeArea(.keyboard)
+    }
+    
+    func checkAndOptimizeTrip(trip: Trip) -> Void {
+        if trip.destination != "Unknown destination" {
+            if TripOptimizer.isFree() {
+                TripOptimizer.optimize(trip)
+                startOptimizedTripChecker()
+            }
+        }
     }
     
     // Since route calculation requests are async, start an interval timer that
@@ -105,99 +74,46 @@ struct TripView: View, KeyboardReadable {
         uOptimizedTrip.setDrivers()
     }
     
-    var SubHeader: some View {
-        HStack {
-            Text(trip.destination)
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                .padding(.horizontal, 15)
-                .lineLimit(3)
-            Spacer()
+    var NavTitle: some View {
+        VStack {
+            HStack {
+                Text(trip.name)
+                    .padding(.leading, 15)
+                    .padding(.top, 10)
+                    .font(.system(size: 28))
+                    .bold()
+                    .lineLimit(1)
+                Spacer()
+                NavigationLink(destination: {
+                    TripSettingsView(trip: $trip)
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 20))
+                        .padding(.trailing, 15)
+                        .padding(.bottom, -12)
+                }
+                .foregroundStyle(.black)
+            }
         }
+        .padding(.bottom, -2)
     }
     
-    var DetailsForm: some View {
-        Form {
-            Section {
-                HStack {
-                    Image(systemName: "location.fill").foregroundStyle(Color("AccentColor"))
-                    Text(trip.destination).font(.subheadline).foregroundStyle(.gray).lineLimit(1).baselineOffset(-2.0)
-                    Spacer()
-                }
-                .cornerRadius(8)
-                .contentShape(Rectangle())
-                .padding(.vertical, 6)
-                .onTapGesture {
-                    isLocationSearchSheetPresent.toggle()
-                }
-                Toggle(isOn: $trip.useSuggestedDrivers, label: {
-                    HStack {
-                        Text("Use suggested drivers")
-                        Image(systemName: "questionmark.circle")
-                            .onTapGesture {
-                                isSuggestedDriverTooltipPresent.toggle()
-                            }.foregroundStyle(.gray)
-                    }
-                    .padding(.vertical, 6)
-                })
-                .alert(
-                    "Suggested drivers",
-                    isPresented: $isSuggestedDriverTooltipPresent,
-                    presenting: String("Drivers have been chosen for optimal efficiency. Turn this feature off if you want to choose your own")
-                ) { msg in
-                    
-                } message: { msg in
-                    Text(msg)
-                }
-            
-        
-                List {
-                    NavigationLink(destination: {
-                        RidersView(trip: $trip)
-                    }) {
-                        HStack {
-                            Text("Drivers & Passengers")
-                            Spacer()
-                            Image(systemName: "steeringwheel")
-                                .padding(.horizontal, -6)
-                                .padding(.leading, 8)
-                            Text(String(trip.drivers))
-                                .font(.system(size: 16.0))
-                                .baselineOffset(-6.0)
-                                .padding(.trailing, 10)
-                        
-                            Image(systemName: "figure.seated.seatbelt")
-                                .padding(.horizontal, -6)
-                            Text(String(trip.passengers))
-                                .font(.system(size: 16.0))
-                                .baselineOffset(-6.0)
-                                .padding(.trailing, 5)
-                        }
-                        .padding(.vertical, 5)
-                    }
-                    NavigationLink(destination: {
-                        TripStepsView(
-                            trip: trip,
-                            optimizedTrip: optimizedTrip,
-                            invalidateView: $invalidateView
-                        
-                        )
-                    }) {
-                        HStack {
-                            Image(systemName: "list.dash")
-                            Text("Step by Step")
-                            Spacer()
-                        }
-                        .padding(.vertical, 5)
-                    }
-                }
+    var SubHeader: some View {
+        VStack {
+            HStack {
+                Text(trip.destination)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+                Spacer()
             }
+            .padding(.horizontal, 15)
+            .padding(.vertical, 10)
         }
     }
     
     var MapModule: some View {
         ZStack {
-//            TripMapView(trip: $trip, optimizedTrip: $optimizedTrip)
             ZStack {
                 TripMapViewRepresentable(
                     invalidateView: $invalidateView,
@@ -207,17 +123,14 @@ struct TripView: View, KeyboardReadable {
                     ProgressView()
                 }
             }
-            HStack {
-                Image(systemName: "plus.magnifyingglass")
-                    .padding(.all, 10)
-                    .contentShape(Rectangle())
-                    .background(.white)
-            }
-            .cornerRadius(5)
-            .position(x:25,y:25)
-            .onTapGesture {
-                isMapViewPresent.toggle()
-            }
+            MapButtonCollection
+            EnlargeMapButton
+        }
+        .onAppear(perform: {
+            checkAndOptimizeTrip(trip: trip)
+        })
+        .onChange(of: trip) { oldValue, newValue in
+            checkAndOptimizeTrip(trip: newValue)
         }
     }
     
@@ -232,7 +145,6 @@ struct TripView: View, KeyboardReadable {
             .padding(18)
             .padding(.top, 5)
             .padding(.trailing, 5)
-//            TripMapView(trip: $trip, optimizedTrip: $optimizedTrip)
             ZStack {
                 TripMapViewRepresentable(
                     invalidateView: $invalidateView,
@@ -245,17 +157,114 @@ struct TripView: View, KeyboardReadable {
         }
     }
     
-    var LocationSheet: some View {
-        LocationSearchView(
-            onResultTap: { completion in
-                isLocationSearchSheetPresent.toggle()
-                trip.destination = "\(completion.title) \(completion.subtitle)"
-            },
-            isPresent: $isLocationSearchSheetPresent
-        )
+    var MapButtonCollection: some View {
+        VStack {
+            HStack {
+                HStack {
+                    NavigationLink(destination: {
+                        TripStepsView(
+                            trip: trip,
+                            optimizedTrip: optimizedTrip,
+                            invalidateView: $invalidateView
+                        )
+                    }) {
+                        HStack {
+                            Image(systemName: "text.append")
+                            Text("Steps")
+                            Image(systemName: "chevron.right")
+                                .font(.system(size:12))
+                                .foregroundStyle(.gray)
+                        }
+                        .padding(.all, 10)
+                        .contentShape(Rectangle())
+                        .background(.white)
+                        .cornerRadius(5)
+                        
+                    }
+                    .foregroundStyle(.black)
+                }
+                HStack {
+                    NavigationLink(destination: {
+                        RidersView(trip: $trip)
+                    }) {
+                        HStack {
+                            Image(systemName: "steeringwheel")
+                                .padding(.trailing, -6)
+                            Text(String(trip.drivers))
+                                .font(.system(size: 16.0))
+                                .baselineOffset(-6.0)
+                            
+                            Image(systemName: "figure.seated.seatbelt")
+                                .padding(.leading, 2)
+                                .padding(.trailing, -6)
+                            Text(String(trip.passengers))
+                                .font(.system(size: 16.0))
+                                .baselineOffset(-6.0)
+                                .padding(.trailing, 5)
+                            Text("Riders")
+                            Image(systemName: "chevron.right")
+                                .font(.system(size:12))
+                                .foregroundStyle(.gray)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.top, 8)
+                        .padding(.bottom, 7)
+                        .contentShape(Rectangle())
+                        .background(.white)
+                        .cornerRadius(5)
+                        
+                    }
+                    .foregroundStyle(.black)
+                }
+                .padding(.leading, 5)
+                Spacer()
+            }
+            Spacer()
+        }
+        .padding(.leading, 10)
+        .padding(.top, 10)
+    }
+    
+    var EnlargeMapButton: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Image(systemName: "plus.magnifyingglass")
+                    .padding(.all, 10)
+                    .contentShape(Rectangle())
+                    .background(.white)
+            }
+            .padding(.bottom, 10)
+            .padding(.trailing, 10)
+            .cornerRadius(5)
+            .onTapGesture {
+                isMapViewPresent.toggle()
+            }
+        }
+    }
+    
+    var OnAppear: some View {
+        HStack {}
+        .onAppear(perform: {
+            if trip.useSuggestedDrivers {
+                if trip.drivers == 0 {
+                    for rider in $trip.riders {
+                        rider.wrappedValue.isDriver = true
+                        break
+                    }
+                }
+            }
+        })
+    }
+
+    var Sheets: some View {
+        HStack {}
+        .popover(isPresented: $isMapViewPresent) {
+            LargeMapModule
+        }
     }
 }
-
 
 
 

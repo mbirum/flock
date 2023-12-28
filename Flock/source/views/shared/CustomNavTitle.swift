@@ -14,17 +14,20 @@ struct CustomNavTitle: View {
                 Text(title)
                     .padding(.leading, 15)
                     .padding(.top, 10)
-                    .font(.system(size: 32))
+                    .font(.system(size: 28))
                     .bold()
                     .lineLimit(2)
                 if isEditable {
                     Image(systemName: "pencil")
                         .foregroundStyle(.gray)
                         .opacity(0.8)
-                        .font(.system(size: 20.0))
+                        .font(.system(size: 18.0))
                         .padding(.top, 18)
                 }
                 Spacer()
+                
+                    
+                
             }
             .onTapGesture {
                 onTap()
