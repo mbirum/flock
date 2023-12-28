@@ -25,36 +25,49 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = location
         let search = MKLocalSearch(request: request)
-        search.start { (response, error) in
-            guard let response = response else {return}
-            guard let item = response.mapItems.first else {return}
+        search.start { response, error in
+            guard let response = response else { return }
+            guard let item = response.mapItems.first else { return }
             mapItemHandler(item)
-            
         }
     }
     
     static func calculateRoute(source: MKMapItem, destination: MKMapItem, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
-        if RouteCache.isRouteCached(source: source.placemark.title!, destination: destination.placemark.title!) {
-            let key: RouteCacheKey = RouteCacheKey(source: source.placemark.title!, destination: destination.placemark.title!)
+        guard let uSourceTitle = source.placemark.title, let uDestinationTitle = destination.placemark.title else {
+            return calculateNewRoute(source: source, destination: destination, routeHandler: routeHandler)
+        }
+        if RouteCache.isRouteCached(source: uSourceTitle, destination: uDestinationTitle) {
+            let key: RouteCacheKey = RouteCacheKey(source: uSourceTitle, destination: uDestinationTitle)
             guard let routeCacheItem: RouteCacheItem = RouteCache.get(key) else { return }
             routeHandler(source, destination, routeCacheItem.route)
             return
         }
-        let request = MKDirections.Request()
-        request.source = source
-        request.destination = destination
-        request.requestsAlternateRoutes = true
-        request.transportType = .automobile
+        return calculateNewRoute(source: source, destination: destination, routeHandler: routeHandler)
+        
+    }
+    
+    static func calculateNewRoute(source: MKMapItem, destination: MKMapItem, routeHandler: @escaping (_ source: MKMapItem, _ destination: MKMapItem, _ route: MKRoute) -> Void) {
 
-        let directions = MKDirections(request: request)
-        directions.calculate {
-            response, error in
+        let directions = MKDirections(
+            request: MKDirections.RequestWith(source, destination)
+        )
+        
+        directions.calculate { response, error in
             guard let uResponse = response else { return }
-            if let route = uResponse.routes.first {
+            if uResponse.routes.count > 0 {
+                var theRoute: MKRoute = uResponse.routes.first!
+                for route in uResponse.routes {
+                    if route.expectedTravelTime < theRoute.expectedTravelTime {
+                        theRoute = route
+                    }
+                }
+                routeHandler(source, destination, theRoute)
+                guard let uSourceTitle = source.placemark.title, 
+                        let uDestinationTitle = destination.placemark.title else { return }
                 RouteCache.put(
-                    key: RouteCacheKey(source: source.placemark.title!, destination: destination.placemark.title!),
-                    route: route)
-                routeHandler(source, destination, route)
+                    key: RouteCacheKey(source: uSourceTitle, destination: uDestinationTitle),
+                    route: theRoute
+                )
             }
         }
     }
@@ -62,3 +75,14 @@ class LocationSearchService: NSObject, ObservableObject, MKLocalSearchCompleterD
 }
 
 extension MKLocalSearchCompletion: Identifiable {}
+
+extension MKDirections {
+    static func RequestWith(_ source: MKMapItem, _ destination: MKMapItem) -> MKDirections.Request {
+        let request = MKDirections.Request()
+        request.source = source
+        request.destination = destination
+        request.requestsAlternateRoutes = true
+        request.transportType = .automobile
+        return request
+    }
+}
