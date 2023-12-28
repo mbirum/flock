@@ -2,7 +2,7 @@
 import Foundation
 import SwiftUI
 
-struct TripDetailsView: View {
+struct TripStepsView: View {
     @State var trip: Trip
     @State var optimizedTrip: OptimizedTrip?
     @Binding var invalidateView: Bool

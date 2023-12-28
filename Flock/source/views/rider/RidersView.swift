@@ -55,17 +55,6 @@ struct RidersView: View {
         .listStyle(.plain)
     }
     
-//    var AddButton: some View {
-//        Button("Add") {
-//            if (newRiderName != "" && newRiderPhone != "") {
-//                let isDriver = (trip.riders.count == 0) ? true : false
-//                trip.riders.append(Rider(name: newRiderName, phoneNumber: newRiderPhone, isDriver: isDriver))
-//                newRiderName = ""
-//                newRiderPhone = ""
-//            }
-//        }.frame(maxWidth: .infinity, alignment: .center)
-//    }
-    
     var AddButton: some View {
         VStack {
             HStack {

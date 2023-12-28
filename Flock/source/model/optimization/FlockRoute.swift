@@ -14,9 +14,7 @@ class FlockRoute: NSObject {
     @objc dynamic var route: MKRoute? = nil
     
     var distance: Double {
-        guard let uRoute = route else { return 0 }
-//        return uRoute.distance
-        return uRoute.expectedTravelTime
+        return route?.expectedTravelTime ?? 0
     }
     
     func initializeObservations() -> Void {

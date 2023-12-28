@@ -21,7 +21,6 @@ class OptimizationRequest {
     }
     
     var optimizedTrip: OptimizedTrip?
-//    var tripVariations: [TripVariation] = []
     
     init(_ trip: Trip) {
         self.trip = trip

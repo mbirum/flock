@@ -4,7 +4,7 @@ import SwiftUI
 import MapKit
 import mbutils
 
-struct TripOverviewView: View, KeyboardReadable {
+struct TripView: View, KeyboardReadable {
     @State var isSuggestedDriverTooltipPresent: Bool = false
     @State var isKeyboardVisible: Bool = false
     @State var isSearchPresent: Bool = true
@@ -176,7 +176,7 @@ struct TripOverviewView: View, KeyboardReadable {
                         .padding(.vertical, 5)
                     }
                     NavigationLink(destination: {
-                        TripDetailsView(
+                        TripStepsView(
                             trip: trip,
                             optimizedTrip: optimizedTrip,
                             invalidateView: $invalidateView

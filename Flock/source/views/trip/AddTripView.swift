@@ -14,7 +14,7 @@ struct AddTripView: View {
         VStack {
             ForEach($tripData.trips) { $trip in
                 if (trip.id == newTrip.id) {
-                    TripOverviewView(trip: $trip)
+                    TripView(trip: $trip)
                 }
             }
         }
