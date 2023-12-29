@@ -179,7 +179,7 @@ struct TripView: View, KeyboardReadable {
                     HStack {
                         Image(systemName: "gear")
                             .fontWeight(.thin)
-                            .font(.system(size: 26))
+                            .font(.system(size: 22))
                     }
                     .padding(.horizontal, 10)
                     .padding(.top, 8)

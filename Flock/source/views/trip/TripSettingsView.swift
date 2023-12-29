@@ -70,7 +70,6 @@ struct TripSettingsView: View {
                 })
                 .toggleStyle(.button)
                 .padding(.vertical, 5)
-//                .padding(.horizontal, 5)
                 .alert(
                     "Suggested drivers",
                     isPresented: $isSuggestedDriverTooltipPresent,

@@ -12,8 +12,8 @@ class TripVariation: Hashable {
         routes = []
     }
     
-    var totalTime: Double {
-        var totalTime: Double = 0
+    var totalTime: TimeInterval {
+        var totalTime: TimeInterval = 0
         for route in routes {
             totalTime += route.route?.expectedTravelTime ?? 0
         }

@@ -37,9 +37,8 @@ struct RidersView: View {
                                 Spacer()
                             }
                         }
-                        Image(systemName: "steeringwheel")
+                        Image(systemName: rider.isDriver ? "steeringwheel" : "figure.seated.seatbelt")
                             .fontWeight(.thin)
-                            .opacity((rider.isDriver) ? 1.0 : 0.3)
                             .onTapGesture {
                                 if !trip.useSuggestedDrivers {
                                     rider.isDriver.toggle()
@@ -81,3 +80,6 @@ struct RidersView: View {
     }
 }
 
+#Preview {
+    HomeView()
+}
