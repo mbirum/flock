@@ -12,6 +12,7 @@ struct TripView: View, KeyboardReadable {
     @State var optimizedTrip: OptimizedTrip? = nil
     @State var loadOverlayPresent: Bool = false
     @State var invalidateView: Bool = false
+    @State var isTripSettingsPresent: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -22,6 +23,12 @@ struct TripView: View, KeyboardReadable {
             }
             OnAppear
             Sheets
+        }
+        .sheet(isPresented: $isTripSettingsPresent) {
+            TripSettingsView(trip: $trip)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            
         }
     }
     
@@ -84,16 +91,16 @@ struct TripView: View, KeyboardReadable {
                     .bold()
                     .lineLimit(1)
                 Spacer()
-                NavigationLink(destination: {
-                    TripSettingsView(trip: $trip)
-                }) {
-                    Image(systemName: "gear")
-                        .fontWeight(.thin)
-                        .font(.system(size: 20))
-                        .padding(.trailing, 15)
-                        .padding(.bottom, -12)
-                }
-                .foregroundStyle(.black)
+//                NavigationLink(destination: {
+//                    TripSettingsView(trip: $trip)
+//                }) {
+//                    Image(systemName: "gear")
+//                        .fontWeight(.thin)
+//                        .font(.system(size: 26))
+//                        .padding(.trailing, 15)
+//                        .padding(.bottom, -10)
+//                }
+//                .foregroundStyle(.black)
             }
         }
         .padding(.bottom, -2)
@@ -169,6 +176,26 @@ struct TripView: View, KeyboardReadable {
         return VStack {
             HStack {
                 HStack {
+                    HStack {
+                        Image(systemName: "gear")
+                            .fontWeight(.thin)
+                            .font(.system(size: 26))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.top, 8)
+                    .padding(.bottom, 7)
+                    .contentShape(Rectangle())
+                    .background(.white)
+                    .cornerRadius(cornerRadius)
+                    .shadow(radius: shadowRadius)
+                    .onTapGesture {
+                        isTripSettingsPresent.toggle()
+                    }
+                }
+                
+                Spacer()
+                
+                HStack {
                     NavigationLink(destination: {
                         TripStepsView(
                             trip: trip,
@@ -194,6 +221,9 @@ struct TripView: View, KeyboardReadable {
                     }
                     .foregroundStyle(.black)
                 }
+                
+                Spacer()
+                
                 HStack {
                     NavigationLink(destination: {
                         RidersView(trip: $trip)
@@ -231,12 +261,11 @@ struct TripView: View, KeyboardReadable {
                     }
                     .foregroundStyle(.black)
                 }
-                .padding(.leading, 5)
-                Spacer()
+                
             }
             Spacer()
         }
-        .padding(.leading, 10)
+        .padding(.horizontal, 10)
         .padding(.top, 10)
     }
     
@@ -281,6 +310,7 @@ struct TripView: View, KeyboardReadable {
         .popover(isPresented: $isMapViewPresent) {
             LargeMapModule
         }
+        
     }
 }
 

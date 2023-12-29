@@ -18,6 +18,9 @@ struct TripStepsView: View {
                             Text(driverName).bold()
                             Image(systemName: "steeringwheel")
                                 .fontWeight(.thin)
+                            Text("\(String(Int(variation.totalTime)/60))m")
+                                .font(.system(size: 14))
+                                .baselineOffset(-4.0)
                             Spacer()
                         }
                         .font(.system(size: 20))
@@ -38,7 +41,13 @@ struct TripStepsView: View {
                                         Image(systemName: "flag.checkered")
                                             .fontWeight(.thin)
                                             .font(.system(size:13))
-                                        Text(route.to.locationString).lineLimit(1).bold()
+                                        Text(route.to.locationString)
+                                            .lineLimit(1)
+                                            .bold()
+                                        Text("- \(String(Int(route.route?.expectedTravelTime ?? 0)/60))m")
+                                            .bold()
+                                            .font(.system(size: 14))
+                                            .baselineOffset(-4.0)
                                     }
                                     else {
                                         Image(systemName: "circle")
@@ -46,6 +55,10 @@ struct TripStepsView: View {
                                             .padding(.trailing, 1)
                                             .font(.system(size:11))
                                         Text(route.to.riderName)
+                                            .lineLimit(1)
+                                        Text("- \(String(Int(route.route?.expectedTravelTime ?? 0)/60))m")
+                                            .font(.system(size: 14))
+                                            .baselineOffset(-4.0)
                                     }
                                     Spacer()
                                 }

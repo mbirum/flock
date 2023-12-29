@@ -10,7 +10,6 @@ struct TripSettingsView: View {
     
     var body: some View {
         VStack {
-            NavTitle
             SettingsForm
             Sheets
         }
@@ -39,7 +38,6 @@ struct TripSettingsView: View {
                 Image(systemName: "pencil.line")
                     .fontWeight(.thin)
                 Text(trip.name).font(.subheadline).lineLimit(1)
-                Spacer()
             }
             .onTapGesture {
                 isTitlePopoverPresent.toggle()
@@ -52,7 +50,6 @@ struct TripSettingsView: View {
                     .foregroundStyle(Color("AccentColor"))
                     .fontWeight(.thin)
                 Text(trip.destination).font(.subheadline).lineLimit(1)
-                Spacer()
             }
             .contentShape(Rectangle())
             .padding(.vertical, 9)
@@ -61,20 +58,19 @@ struct TripSettingsView: View {
             }
             
             HStack {
+                Image(systemName: "steeringwheel")
+                    .fontWeight(.thin)
                 Toggle(isOn: $trip.useSuggestedDrivers, label: {
                     HStack {
-                        Image(systemName: "steeringwheel")
-                            .fontWeight(.thin)
                         Text("Use suggested drivers")
-                        Image(systemName: "questionmark.circle")
-                            .fontWeight(.thin)
-                            .onTapGesture {
-                                isSuggestedDriverTooltipPresent.toggle()
-                            }.foregroundStyle(.gray)
+                            .padding(.leading, 0)
+                        Spacer()
                     }
-                    //                        .padding(.vertical, 6)
+                    
                 })
-                .toggleStyle(.switch)
+                .toggleStyle(.button)
+                .padding(.vertical, 5)
+//                .padding(.horizontal, 5)
                 .alert(
                     "Suggested drivers",
                     isPresented: $isSuggestedDriverTooltipPresent,
@@ -84,8 +80,11 @@ struct TripSettingsView: View {
                 } message: { msg in
                     Text(msg)
                 }
-                .padding(.vertical, 5)
-                Spacer()
+                Image(systemName: "questionmark.circle")
+                    .fontWeight(.thin)
+                    .onTapGesture {
+                        isSuggestedDriverTooltipPresent.toggle()
+                    }.foregroundStyle(.gray)
             }
         }
     }
