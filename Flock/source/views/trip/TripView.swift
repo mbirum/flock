@@ -87,7 +87,8 @@ struct TripView: View, KeyboardReadable {
                 NavigationLink(destination: {
                     TripSettingsView(trip: $trip)
                 }) {
-                    Image(systemName: "gearshape")
+                    Image(systemName: "gear")
+                        .fontWeight(.thin)
                         .font(.system(size: 20))
                         .padding(.trailing, 15)
                         .padding(.bottom, -12)
@@ -109,6 +110,7 @@ struct TripView: View, KeyboardReadable {
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 10)
+            .padding(.bottom, 5)
         }
     }
     
@@ -158,7 +160,13 @@ struct TripView: View, KeyboardReadable {
     }
     
     var MapButtonCollection: some View {
-        VStack {
+        let shadowRadius: CGFloat = 10
+        let cornerRadius: CGFloat = 25
+        let chevronSize: CGFloat = 12
+        let riderNumFontSize: CGFloat = 16
+        let riderNumOffset: CGFloat = -6.0
+        let riderIconTrailingPadding: CGFloat = -6
+        return VStack {
             HStack {
                 HStack {
                     NavigationLink(destination: {
@@ -170,15 +178,18 @@ struct TripView: View, KeyboardReadable {
                     }) {
                         HStack {
                             Image(systemName: "text.append")
+                                .fontWeight(.thin)
                             Text("Steps")
                             Image(systemName: "chevron.right")
-                                .font(.system(size:12))
+                                .fontWeight(.thin)
+                                .font(.system(size: chevronSize))
                                 .foregroundStyle(.gray)
                         }
                         .padding(.all, 10)
                         .contentShape(Rectangle())
                         .background(.white)
-                        .cornerRadius(5)
+                        .cornerRadius(cornerRadius)
+                        .shadow(radius: shadowRadius)
                         
                     }
                     .foregroundStyle(.black)
@@ -189,21 +200,24 @@ struct TripView: View, KeyboardReadable {
                     }) {
                         HStack {
                             Image(systemName: "steeringwheel")
-                                .padding(.trailing, -6)
+                                .fontWeight(.thin)
+                                .padding(.trailing, riderIconTrailingPadding)
                             Text(String(trip.drivers))
-                                .font(.system(size: 16.0))
-                                .baselineOffset(-6.0)
+                                .font(.system(size: riderNumFontSize))
+                                .baselineOffset(riderNumOffset)
                             
                             Image(systemName: "figure.seated.seatbelt")
+                                .fontWeight(.thin)
                                 .padding(.leading, 2)
-                                .padding(.trailing, -6)
+                                .padding(.trailing, riderIconTrailingPadding)
                             Text(String(trip.passengers))
-                                .font(.system(size: 16.0))
-                                .baselineOffset(-6.0)
+                                .font(.system(size: riderNumFontSize))
+                                .baselineOffset(riderNumOffset)
                                 .padding(.trailing, 5)
                             Text("Riders")
                             Image(systemName: "chevron.right")
-                                .font(.system(size:12))
+                                .fontWeight(.thin)
+                                .font(.system(size: chevronSize))
                                 .foregroundStyle(.gray)
                         }
                         .padding(.horizontal, 10)
@@ -211,7 +225,8 @@ struct TripView: View, KeyboardReadable {
                         .padding(.bottom, 7)
                         .contentShape(Rectangle())
                         .background(.white)
-                        .cornerRadius(5)
+                        .cornerRadius(cornerRadius)
+                        .shadow(radius: shadowRadius)
                         
                     }
                     .foregroundStyle(.black)
@@ -226,18 +241,21 @@ struct TripView: View, KeyboardReadable {
     }
     
     var EnlargeMapButton: some View {
-        VStack {
+        let shadowRadius: CGFloat = 10
+        return VStack {
             Spacer()
             HStack {
                 Spacer()
                 Image(systemName: "plus.magnifyingglass")
-                    .padding(.all, 10)
+                    .fontWeight(.thin)
+                    .padding(.all, 15)
                     .contentShape(Rectangle())
                     .background(.white)
+                    .cornerRadius(50)
+                    .shadow(radius: shadowRadius)
             }
             .padding(.bottom, 10)
             .padding(.trailing, 10)
-            .cornerRadius(5)
             .onTapGesture {
                 isMapViewPresent.toggle()
             }

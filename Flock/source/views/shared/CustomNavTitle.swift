@@ -19,15 +19,13 @@ struct CustomNavTitle: View {
                     .lineLimit(2)
                 if isEditable {
                     Image(systemName: "pencil")
+                        .fontWeight(.thin)
                         .foregroundStyle(.gray)
                         .opacity(0.8)
                         .font(.system(size: 18.0))
                         .padding(.top, 18)
                 }
                 Spacer()
-                
-                    
-                
             }
             .onTapGesture {
                 onTap()

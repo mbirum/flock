@@ -24,7 +24,8 @@ struct TripSettingsView: View {
                     .padding(.top, 10)
                     .font(.system(size: 28))
                     .bold()
-                Image(systemName: "gearshape")
+                Image(systemName: "gear")
+                    .fontWeight(.thin)
                     .font(.system(size: 24))
                     .padding(.bottom, -12)
                 Spacer()
@@ -36,6 +37,7 @@ struct TripSettingsView: View {
         Form {
             HStack {
                 Image(systemName: "pencil.line")
+                    .fontWeight(.thin)
                 Text(trip.name).font(.subheadline).lineLimit(1)
                 Spacer()
             }
@@ -46,7 +48,9 @@ struct TripSettingsView: View {
             .padding(.vertical, 10)
             
             HStack {
-                Image(systemName: "location.fill").foregroundStyle(Color("AccentColor"))
+                Image(systemName: "location.fill")
+                    .foregroundStyle(Color("AccentColor"))
+                    .fontWeight(.thin)
                 Text(trip.destination).font(.subheadline).lineLimit(1)
                 Spacer()
             }
@@ -60,8 +64,10 @@ struct TripSettingsView: View {
                 Toggle(isOn: $trip.useSuggestedDrivers, label: {
                     HStack {
                         Image(systemName: "steeringwheel")
+                            .fontWeight(.thin)
                         Text("Use suggested drivers")
                         Image(systemName: "questionmark.circle")
+                            .fontWeight(.thin)
                             .onTapGesture {
                                 isSuggestedDriverTooltipPresent.toggle()
                             }.foregroundStyle(.gray)

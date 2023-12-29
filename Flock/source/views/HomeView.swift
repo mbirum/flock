@@ -22,10 +22,12 @@ struct HomeView: View {
             .tabItem() {
                 Label("Trips", systemImage: "car.rear.road.lane")
             }
+            .padding(.bottom, 5)
             MeProfileView(profile: $meProfileStorage.profile)
                 .tabItem() {
                     Label("Me", systemImage: "person.circle")
                 }
+                .padding(.bottom, 5)
         }
     }
     
@@ -65,6 +67,7 @@ struct HomeView: View {
                             Spacer()
                             HStack {
                                 Image(systemName: "steeringwheel")
+                                    .fontWeight(.thin)
                                     .padding(.horizontal, -6)
                                     .padding(.leading, 8)
                                 Text(String(trip.drivers))
@@ -73,6 +76,7 @@ struct HomeView: View {
                                     .padding(.trailing, -2)
                             
                                 Image(systemName: "figure.seated.seatbelt")
+                                    .fontWeight(.thin)
                                     .padding(.trailing, -8)
                                 Text(String(trip.passengers))
                                     .font(.system(size: 11.0))

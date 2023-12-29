@@ -4,7 +4,6 @@ import SwiftUI
 import MapKit
 
 struct RiderDetailsView: View {
-    @State var meProfileTitle: String = "Me"
     @Binding var rider: Rider
     @Binding var isUseSuggestedDrivers: Bool
     @State var isMeProfile: Bool
@@ -21,15 +20,8 @@ struct RiderDetailsView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                CustomNavTitle(title: $rider.name, divide: false, isEditable: true, onTap: {
-                    isTitlePopoverPresent.toggle()
-                })
-                if !isMeProfile {
-                    SubHeader
-                }
-                DetailsForm
+                RiderDetails
                 MapModule
-                    .frame(height:200)
             }
             .sheet(isPresented: $isTitlePopoverPresent) {
                 GenericTextFieldSheet(label: "Name", field: $formName, isPresent: $isTitlePopoverPresent)
@@ -52,8 +44,75 @@ struct RiderDetailsView: View {
         .sheet(isPresented: $isLocationSearchSheetPresent) {
             LocationSheet
         }
-        .navigationBarItems(trailing: Image(systemName: (isMeProfile) ? "person.circle" : (rider.isDriver) ? "steeringwheel" : "figure.seated.seatbelt"))
+        .navigationBarItems(trailing: Image(systemName: (isMeProfile) ? "person.circle" : (rider.isDriver) ? "steeringwheel" : "figure.seated.seatbelt").fontWeight(.thin))
 
+    }
+    
+    var RiderDetails: some View {
+        VStack {
+            HStack {
+                Text(rider.name)
+                    .padding(.leading, 15)
+                    .padding(.top, 10)
+                    .font(.system(size: 28))
+                    .bold()
+                    .lineLimit(1)
+                Image(systemName: "pencil")
+                    .fontWeight(.thin)
+                    .foregroundStyle(.gray)
+                    .opacity(0.8)
+                    .font(.system(size: 18.0))
+                    .padding(.top, 18)
+                Spacer()
+            }
+            .padding(.bottom, 2)
+            .onTapGesture {
+                isTitlePopoverPresent.toggle()
+            }
+            if !isMeProfile {
+                SubHeader
+            }
+            
+            Divider()
+            
+            HStack {
+                Image(systemName: "phone.fill").fontWeight(.thin)
+                PhoneNumberTextField(value: $formPhone)
+                Spacer()
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 8)
+            .padding(.horizontal, 15)
+            .onChange(of: formPhone) { oldValue, newValue in
+                rider.phoneNumber = formPhone
+            }
+            
+            Divider()
+            
+            HStack {
+                Image(systemName: "location.fill")
+                    .foregroundStyle(Color("AccentColor"))
+                    .fontWeight(.thin)
+                Text(rider.location).font(.subheadline).foregroundStyle(.gray).lineLimit(1).baselineOffset(-2.0)
+                Spacer()
+            }
+            .cornerRadius(8)
+            .contentShape(Rectangle())
+            .padding(.vertical, 9)
+            .padding(.horizontal, 15)
+            .onTapGesture {
+                isLocationSearchSheetPresent.toggle()
+            }
+            
+            if !isMeProfile {
+                Divider()
+                IsDrivingToggle
+            }
+            Divider()
+            CapacityStack
+            Divider()
+        }
+//        .padding(.bottom, 5)
     }
     
     var SubHeader: some View {
@@ -62,43 +121,14 @@ struct RiderDetailsView: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
                 .padding(.horizontal, 15)
+                .padding(.bottom, 2)
                 .lineLimit(3)
             Spacer()
         }
     }
     
     var DetailsForm: some View {
-        Form {
-            HStack {
-                Image(systemName: "phone.fill")
-                PhoneNumberTextField(value: $formPhone)
-                Spacer()
-            }
-            .contentShape(Rectangle())
-            .padding(.vertical, 8)
-            .onChange(of: formPhone) { oldValue, newValue in
-                rider.phoneNumber = formPhone
-            }
-            HStack {
-                Image(systemName: "location.fill").foregroundStyle(Color("AccentColor"))
-                Text(rider.location).font(.subheadline).foregroundStyle(.gray).lineLimit(1).baselineOffset(-2.0)
-                Spacer()
-            }
-            .cornerRadius(8)
-            .contentShape(Rectangle())
-            .padding(.vertical, 9)
-            .onTapGesture {
-                isLocationSearchSheetPresent.toggle()
-            }
-            
-            if isMeProfile {
-                CapacityStack
-            }
-            else {
-                IsDrivingToggle
-                CapacityStack
-            }
-        }
+        Text("hello")
     }
     
     var LocationSheet: some View {
@@ -114,17 +144,7 @@ struct RiderDetailsView: View {
     var MapModule: some View {
         ZStack {
             SinglePinMapView(riderId: rider.id, pinLocationString: $rider.location)
-            HStack {
-                Image(systemName: "plus.magnifyingglass")
-                    .padding(.all, 10)
-                    .contentShape(Rectangle())
-                    .background(.white)
-            }
-            .cornerRadius(5)
-            .position(x:25,y:25)
-            .onTapGesture {
-                isMapViewPresent.toggle()
-            }
+            EnlargeMapButton
         }
     }
     
@@ -144,21 +164,54 @@ struct RiderDetailsView: View {
     }
     
     var IsDrivingToggle: some View {
-        Toggle("Driving", isOn: $rider.isDriver).disabled(isUseSuggestedDrivers).padding(.vertical, 4)
+        HStack {
+            Image(systemName: "steeringwheel")
+                .fontWeight(.thin)
+            Toggle("Driving", isOn: $rider.isDriver)
+                .disabled(isUseSuggestedDrivers)
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 15)
     }
     
-    var CapacityStack : some View {
+    var CapacityStack: some View {
         HStack {
+            Image(systemName: "car")
+                .fontWeight(.thin)
             Text("Capacity")
             Picker("Capacity", selection: $formCapacity) {
                 ForEach(1...8, id: \.self) {
                     Text(String($0)).tag($0)
                 }
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
             .pickerStyle(.segmented)
             .onChange(of: formCapacity) { oldValue, newValue in
                 rider.passengerCapacity = newValue
+            }
+        }
+        .padding(.horizontal, 15)
+    }
+    
+    var EnlargeMapButton: some View {
+        let shadowRadius: CGFloat = 10
+        return VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Image(systemName: "plus.magnifyingglass")
+                    .fontWeight(.thin)
+                    .padding(.all, 15)
+                    .contentShape(Rectangle())
+                    .background(.white)
+                    .cornerRadius(50)
+                    .shadow(radius: shadowRadius)
+            }
+            .padding(.bottom, 10)
+            .padding(.trailing, 10)
+            .onTapGesture {
+                isMapViewPresent.toggle()
             }
         }
     }

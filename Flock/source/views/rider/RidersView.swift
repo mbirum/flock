@@ -38,6 +38,7 @@ struct RidersView: View {
                             }
                         }
                         Image(systemName: "steeringwheel")
+                            .fontWeight(.thin)
                             .opacity((rider.isDriver) ? 1.0 : 0.3)
                             .onTapGesture {
                                 if !trip.useSuggestedDrivers {
