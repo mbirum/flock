@@ -3,7 +3,6 @@ import Foundation
 import SwiftUI
 
 struct HomeView: View {
-    @State var title: String = "Trips"
     @ObservedObject var tripData: TripDataStorage = TripDataStorage.shared
     @ObservedObject var meProfileStorage: MeProfileStorage = MeProfileStorage.shared
     
@@ -11,7 +10,7 @@ struct HomeView: View {
         TabView {
             NavigationStack {
                 VStack {
-                    CustomNavTitle(title: $title, divide: true, isEditable: false, onTap: {})
+                    NavTitle
                     TripList
                         .onAppear(perform: {
                             RiderLocationCache.initializeCache(from: tripData.trips)
@@ -34,6 +33,14 @@ struct HomeView: View {
                 }
                 .padding(.bottom, 5)
         }
+    }
+    
+    var NavTitle: some View {
+        CustomNavTitle {
+            DefaultNavTitleText("Trips")
+        }
+        .defaultPadding()
+        .divider()
     }
     
     var AddTripButton: some View {

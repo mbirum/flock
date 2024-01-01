@@ -83,25 +83,10 @@ struct TripView: View, KeyboardReadable {
     
     var NavTitle: some View {
         VStack {
-            HStack {
-                Text(trip.name)
-                    .padding(.leading, 15)
-                    .padding(.top, 10)
-                    .font(.system(size: 28))
-                    .bold()
-                    .lineLimit(1)
-                Spacer()
-//                NavigationLink(destination: {
-//                    TripSettingsView(trip: $trip)
-//                }) {
-//                    Image(systemName: "gear")
-//                        .fontWeight(.thin)
-//                        .font(.system(size: 26))
-//                        .padding(.trailing, 15)
-//                        .padding(.bottom, -10)
-//                }
-//                .foregroundStyle(.black)
+            CustomNavTitle {
+                DefaultNavTitleText(trip.name)
             }
+            .defaultPadding()
         }
         .padding(.bottom, -2)
     }

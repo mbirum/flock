@@ -15,23 +15,6 @@ struct TripSettingsView: View {
         }
     }
     
-    var NavTitle: some View {
-        VStack {
-            HStack {
-                Text("Settings")
-                    .padding(.leading, 15)
-                    .padding(.top, 10)
-                    .font(.system(size: 28))
-                    .bold()
-                Image(systemName: "gear")
-                    .fontWeight(.thin)
-                    .font(.system(size: 24))
-                    .padding(.bottom, -12)
-                Spacer()
-            }
-        }
-    }
-    
     var SettingsForm: some View {
         Form {
             HStack {

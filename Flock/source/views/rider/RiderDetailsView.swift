@@ -50,25 +50,14 @@ struct RiderDetailsView: View {
     
     var RiderDetails: some View {
         VStack {
-            HStack {
-                Text(rider.name)
-                    .padding(.leading, 15)
-                    .padding(.top, 10)
-                    .font(.system(size: 28))
-                    .bold()
-                    .lineLimit(1)
-                Image(systemName: "pencil")
-                    .fontWeight(.thin)
-                    .foregroundStyle(.gray)
-                    .opacity(0.8)
-                    .font(.system(size: 18.0))
-                    .padding(.top, 18)
-                Spacer()
+            CustomNavTitle {
+                DefaultNavTitleText(rider.name)
             }
-            .padding(.bottom, 2)
-            .onTapGesture {
+            .editable {
                 isTitlePopoverPresent.toggle()
             }
+            .padding(.bottom, 2)
+
             if !isMeProfile {
                 SubHeader
             }
