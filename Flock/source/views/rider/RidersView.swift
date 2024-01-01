@@ -13,7 +13,7 @@ struct RidersView: View {
         NavigationStack {
             VStack {
                 RiderList
-                AddButton
+                AddRiderButton
             }
         }
     }
@@ -55,28 +55,8 @@ struct RidersView: View {
         .listStyle(.plain)
     }
     
-    var AddButton: some View {
-        VStack {
-            HStack {
-                NavigationLink(destination: {
-                    AddRiderView(trip: $trip)
-                }) {
-                    HStack {
-                        Spacer()
-                        Text("Add Rider")
-                        Spacer()
-                    }
-                    .padding(.vertical, 15)
-                    .contentShape(Rectangle())
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .background(Color("AccentColor"))
-            .foregroundStyle(.white)
-            .cornerRadius(8)
-        }
-        .frame(height: 75)
-        .padding(.horizontal, 25)
+    var AddRiderButton: some View {
+        AddButton("Add Rider", destination: AnyView(AddRiderView(trip: $trip)))
     }
 }
 

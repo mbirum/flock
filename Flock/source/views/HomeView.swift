@@ -44,27 +44,7 @@ struct HomeView: View {
     }
     
     var AddTripButton: some View {
-        VStack {
-            HStack {
-                NavigationLink(destination: {
-                    AddTripView()
-                }) {
-                    HStack {
-                        Spacer()
-                        Text("Add Trip")
-                        Spacer()
-                    }
-                    .padding(.vertical, 15)
-                    .contentShape(Rectangle())
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .background(Color("AccentColor"))
-            .foregroundStyle(.white)
-            .cornerRadius(8)
-        }
-        .frame(height: 75)
-        .padding(.horizontal, 25)
+        AddButton("Add Trip", destination: AnyView(AddTripView()))
     }
     
     var TripList: some View {
