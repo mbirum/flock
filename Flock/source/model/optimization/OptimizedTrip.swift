@@ -4,7 +4,16 @@ import Foundation
 class OptimizedTrip {
     var originalTrip: Trip?
     var tripVariations: [TripVariation] = []
-    var totalTime: Double = Double.greatestFiniteMagnitude
+    var totalTime: TimeInterval = Double.greatestFiniteMagnitude
+    var longestTripTime: TimeInterval {
+        var longestTime: TimeInterval = 0
+        for tripVariation in tripVariations {
+            if tripVariation.totalTime > longestTime {
+                longestTime = tripVariation.totalTime
+            }
+        }
+        return longestTime
+    }
     
     init(originalTrip: Trip, tripVariations: [TripVariation]) {
         self.tripVariations = tripVariations

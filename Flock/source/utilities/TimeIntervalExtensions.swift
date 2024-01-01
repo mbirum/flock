@@ -4,7 +4,7 @@ import Foundation
 extension TimeInterval {
     func toString() -> String {
         var string = ""
-        var timeInMinutes = self / 60.0
+        let timeInMinutes = self / 60.0
         let timeInHours = timeInMinutes / 60.0
         let days = Int(floor(timeInHours / 24.0))
         let hours = Int(floor(timeInHours.truncatingRemainder(dividingBy: 24)))

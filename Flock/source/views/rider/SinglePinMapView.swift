@@ -6,7 +6,7 @@ struct SinglePinMapView: View {
     
     @State var riderId: UUID?
     @Binding var pinLocationString: String
-    @State var pin: MKMapItem = DefaultMapKitLocation.pin
+    @State var pin: MKMapItem = UserLocationManager.getUserPin()
     
     var body: some View {
         SinglePinMapViewRepresentable(pin: $pin)

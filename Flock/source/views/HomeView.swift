@@ -28,6 +28,11 @@ struct HomeView: View {
                     Label("Me", systemImage: "person.circle")
                 }
                 .padding(.bottom, 5)
+            LocationView()
+                .tabItem() {
+                    Label("Location", systemImage: "location")
+                }
+                .padding(.bottom, 5)
         }
     }
     

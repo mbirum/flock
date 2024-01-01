@@ -117,23 +117,37 @@ struct TripView: View, KeyboardReadable {
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 10)
-            .padding(.bottom, 5)
+            .padding(.bottom, -3)
         }
     }
     
     var MapModule: some View {
-        ZStack {
-            ZStack {
-                TripMapViewRepresentable(
-                    invalidateView: $invalidateView,
-                    optimizedTrip: $optimizedTrip
-                )
-                if loadOverlayPresent {
-                    ProgressView()
-                }
+        var tripTime = "0h 0m"
+        if let uOptimizedTrip = optimizedTrip {
+            tripTime = uOptimizedTrip.longestTripTime.toString()
+        }
+        return VStack {
+            HStack {
+                Spacer()
+                Text(tripTime)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .bold()
+                    .padding(.trailing, 15)
             }
-            MapButtonCollection
-            EnlargeMapButton
+            ZStack {
+                ZStack {
+                    TripMapViewRepresentable(
+                        invalidateView: $invalidateView,
+                        optimizedTrip: $optimizedTrip
+                    )
+                    if loadOverlayPresent {
+                        ProgressView()
+                    }
+                }
+                MapButtonCollection
+                EnlargeMapButton
+            }
         }
         .onAppear(perform: {
             checkAndOptimizeTrip(trip: trip)
@@ -294,6 +308,9 @@ struct TripView: View, KeyboardReadable {
     var OnAppear: some View {
         HStack {}
         .onAppear(perform: {
+            if trip.destination == "Unknown destination" {
+                isTripSettingsPresent = true
+            }
             if trip.useSuggestedDrivers {
                 if trip.drivers == 0 {
                     for rider in $trip.riders {
@@ -325,7 +342,7 @@ struct TripMapViewRepresentable: UIViewRepresentable {
     var mapViewDelegate: MapViewDelegate = MapViewDelegate()
     
     func getRegion() -> MKCoordinateRegion {
-        return DefaultMapKitLocation.region
+        return UserLocationManager.getUserRegion()
     }
     
     func updateUIView(_ view: MKMapView, context: Context) {
@@ -336,20 +353,17 @@ struct TripMapViewRepresentable: UIViewRepresentable {
             view.removeOverlay(overlay)
         }
         view.delegate = mapViewDelegate
-        view.setRegion(getRegion(), animated: true)
-        view.setVisibleMapRect(
-            DefaultMapKitLocation.rect,
-            edgePadding: UIEdgeInsets.init(top: 100.0, left: 50.0, bottom: 100.0, right: 50.0),
-            animated: true
-        )
         
-        guard let uOptimizedTrip = optimizedTrip else { return }
+        guard let uOptimizedTrip = optimizedTrip else {
+            return
+        }
         
         var minX: Double = Double.greatestFiniteMagnitude
         var minY: Double = Double.greatestFiniteMagnitude
         var width: Double = 0
         var height: Double = 0
         for tripVariation in uOptimizedTrip.tripVariations {
+            print(tripVariation.routes.count)
             for flockRoute in tripVariation.routes {
                 guard let uFlockRoute = flockRoute.route,
                         let uFlockFromPin = flockRoute.from.pin,
@@ -375,6 +389,7 @@ struct TripMapViewRepresentable: UIViewRepresentable {
             size: MKMapSize(width: width, height: height)
         )
         view.setVisibleMapRect(rect, edgePadding: UIEdgeInsets.init(top: 90.0, left: 75.0, bottom: 75.0, right: 75.0), animated: true)
+         
     }
     
     func makeUIView(context: Context) -> MKMapView {
